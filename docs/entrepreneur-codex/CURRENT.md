@@ -2,19 +2,22 @@
 
 ## Current slice
 
-Establish the fresh workspace and persistent repository memory.
+Document the three operating contracts required before the lightweight Entrepreneur ECC profile is designed:
+
+- Codex Project and session topology;
+- tool and connection maintenance; and
+- insurance knowledge architecture.
 
 ## Acceptance criteria
 
-- Fresh `C:\DevV2` structure exists.
-- ECC fork is cloned and inspected.
-- Shared direction documents exist.
-- Private insurance-ops repository exists.
-- Insurance data boundaries exist.
-- No automation or runtime feature has been built.
-- No old repository has been modified.
-- The next slice is clearly recommended.
+- Projects, threads, worktrees, skills, connections, and private knowledge have clear roles.
+- Insurance Ops — Build and Insurance Desk — Operate remain separate.
+- Every connection has a permission, health, maintenance, failure, and revocation contract.
+- Account memory and organization process knowledge have clear structures and authority.
+- Applied EPIC remains the official account and activity record.
+- No runtime, connector, profile, private store, directory, or database is created.
+- The next slice is clearly recommended but not started.
 
 ## Recommended next slice
 
-Define the lightweight Entrepreneur ECC profile as one bounded, documentation-first slice.
+Design the lightweight Entrepreneur ECC profile as a bounded documentation and configuration contract.

@@ -1,8 +1,9 @@
 # Entrepreneur Codex Roadmap
 
 1. Foundation and repository memory
-2. Lightweight Entrepreneur ECC profile
-3. Private insurance-assistance pilot
-4. Simple Software Studio starter
-5. Approved connectors and monitoring
-6. Evidence-based expansion or consolidation
+2. Operating contracts for Projects, connections, and insurance knowledge
+3. Lightweight Entrepreneur ECC profile contract
+4. Private insurance-assistance pilot
+5. Simple Software Studio starter
+6. Approved connectors and monitoring
+7. Evidence-based expansion or consolidation
