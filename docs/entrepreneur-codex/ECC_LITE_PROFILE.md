@@ -217,12 +217,21 @@ The following operations remain read-only:
 
 ### New-install collision policy
 
+A pristine first install requires both intended skill destinations to be absent,
+and the ECC installed-state file to be absent.
+
 A new installation must fail closed when:
 
 - either intended skill destination already exists;
 - the ECC installed-state file already exists;
 - an intended destination is a symlink, junction, or path escape; or
-- state is missing, malformed, or inconsistent.
+- state is missing, malformed, or inconsistent while prior or partial
+  ECC-managed artifacts exist.
+
+Missing state by itself is not a pristine first-install collision when both
+intended destinations are absent and no prior or partial ECC-managed artifacts
+exist. Missing, malformed, or inconsistent state must fail closed when prior or
+partial ECC-managed artifacts exist.
 
 Identical existing content must not be silently adopted.
 
@@ -239,7 +248,9 @@ Existing legacy locations, including:
 may be reported but must not be moved, adopted, overwritten, disabled, merged,
 or deleted. Legacy migration or coexistence remains a separate future design.
 
-### Repair and uninstall
+### Doctor, repair, and uninstall
+
+Doctor must remain read-only and fail closed without valid matching ECC state.
 
 Repair and uninstall must:
 
