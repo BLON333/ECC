@@ -9,6 +9,9 @@ const path = require('path');
 const repoRoot = path.resolve(__dirname, '../..');
 const { createManifestInstallPlan } = require('../../scripts/lib/install-executor');
 const { resolveInstallPlan } = require('../../scripts/lib/install-manifests');
+const {
+  copyFileExclusiveWithinTrustedRoot,
+} = require('../../scripts/lib/entrepreneur-codex-profile');
 
 let passed = 0;
 let failed = 0;
@@ -139,6 +142,31 @@ test('does not redirect unrelated Codex profiles into the ECC Lite managed skill
       const relative = path.relative(eccLiteSkillsRoot, operation.destinationPath);
       return relative.startsWith('..') || path.isAbsolute(relative);
     }));
+  });
+});
+
+test('removes a partially written managed file when fsync fails', () => {
+  withTempHome(homeDir => {
+    const sourcePath = path.join(homeDir, 'source.md');
+    const trustedRoot = path.join(homeDir, '.agents', 'skills');
+    const destinationPath = path.join(trustedRoot, 'intent-driven-development', 'SKILL.md');
+    fs.writeFileSync(sourcePath, 'managed content');
+    fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
+
+    const originalFsync = fs.fsyncSync;
+    fs.fsyncSync = () => {
+      throw new Error('simulated fsync failure');
+    };
+    try {
+      assert.throws(
+        () => copyFileExclusiveWithinTrustedRoot(sourcePath, destinationPath, trustedRoot, 'install'),
+        /simulated fsync failure/i,
+      );
+    } finally {
+      fs.fsyncSync = originalFsync;
+    }
+
+    assert.ok(!fs.existsSync(destinationPath));
   });
 });
 

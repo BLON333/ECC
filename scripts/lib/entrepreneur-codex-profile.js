@@ -45,16 +45,34 @@ function assertTrustedRoots(paths, action) {
   assertWithinTrustedRoot(paths.statePath, paths.codexRoot, action);
 }
 
+function sameStatField(left, right, fieldName) {
+  if (!(fieldName in left) || !(fieldName in right)) {
+    return true;
+  }
+  return left[fieldName] === right[fieldName];
+}
+
+function sameBirthtime(left, right) {
+  return sameStatField(left, right, 'birthtimeNs')
+    && sameStatField(left, right, 'birthtimeMs');
+}
+
+function sameFilesystemObjectIdentity(left, right) {
+  return sameStatField(left, right, 'mode')
+    && sameStatField(left, right, 'size')
+    && sameStatField(left, right, 'mtimeNs')
+    && sameStatField(left, right, 'mtimeMs')
+    && sameStatField(left, right, 'ctimeNs')
+    && sameStatField(left, right, 'ctimeMs');
+}
+
 function sameFileIdentity(left, right) {
   return Boolean(left)
     && Boolean(right)
     && left.dev === right.dev
     && left.ino === right.ino
-    && (
-      typeof left.birthtimeMs !== 'number'
-      || typeof right.birthtimeMs !== 'number'
-      || left.birthtimeMs === right.birthtimeMs
-    );
+    && sameBirthtime(left, right)
+    && sameFilesystemObjectIdentity(left, right);
 }
 
 function removeCreatedFileIfUnchanged(filePath, identity) {
@@ -128,14 +146,23 @@ function copyFileExclusiveWithinTrustedRoot(sourcePath, destinationPath, trusted
     fs.fsyncSync(descriptor);
 
     assertWithinTrustedRoot(destinationPath, trustedRoot, action);
+    const writtenDescriptorIdentity = fs.fstatSync(descriptor, { bigint: true });
     const writtenPathIdentity = fs.statSync(destinationPath, { bigint: true });
-    if (!sameFileIdentity(writtenPathIdentity, identity)) {
+    if (!sameFileIdentity(writtenPathIdentity, writtenDescriptorIdentity)) {
       throw new Error(`Refusing ${action}: destination changed while writing managed content`);
     }
+    identity = writtenPathIdentity;
   } catch (error) {
     failure = error;
   } finally {
     if (descriptor !== null) {
+      try {
+        // Bind cleanup to the descriptor's final contents even when write or
+        // fsync fails after the exclusive create has already changed the file.
+        identity = fs.fstatSync(descriptor, { bigint: true });
+      } catch (error) {
+        failure = failure || error;
+      }
       try {
         fs.closeSync(descriptor);
       } catch (error) {

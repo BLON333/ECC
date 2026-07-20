@@ -115,16 +115,49 @@ function findHooksSourcePath(plan, hooksDestinationPath) {
   return operation ? operation.sourcePath : null;
 }
 
+function sameStatField(left, right, fieldName) {
+  if (!(fieldName in left) || !(fieldName in right)) {
+    return true;
+  }
+  return left[fieldName] === right[fieldName];
+}
+
 function samePathIdentity(left, right) {
   return Boolean(left)
     && Boolean(right)
     && left.dev === right.dev
     && left.ino === right.ino
-    && (
-      typeof left.birthtimeMs !== 'number'
-      || typeof right.birthtimeMs !== 'number'
-      || left.birthtimeMs === right.birthtimeMs
+    && sameStatField(left, right, 'birthtimeNs')
+    && sameStatField(left, right, 'birthtimeMs')
+    && sameStatField(left, right, 'mode')
+    && sameStatField(left, right, 'size')
+    && sameStatField(left, right, 'mtimeNs')
+    && sameStatField(left, right, 'mtimeMs')
+    && sameStatField(left, right, 'ctimeNs')
+    && sameStatField(left, right, 'ctimeMs');
+}
+
+function getTrackedDirectoryIdentity(recorded) {
+  if (recorded.descriptor === null) {
+    return recorded.identity;
+  }
+  return fs.fstatSync(recorded.descriptor, { bigint: true });
+}
+
+function closeTrackedDirectory(recorded) {
+  if (recorded.descriptor === null) {
+    return;
+  }
+  try {
+    fs.closeSync(recorded.descriptor);
+  } catch (error) {
+    // State publication and rollback outcomes must not be masked by a handle
+    // close failure; the process will release the descriptor on exit.
+    process.emitWarning(
+      `Failed to close ECC Lite directory identity handle for ${recorded.directoryPath}: ${error.message}`,
+      { code: 'ECC_LITE_DIRECTORY_HANDLE_CLOSE_FAILED' }
     );
+  }
 }
 
 function ensureTrackedDirectory(directoryPath, boundaryPath, allowedExisting, createdDirectories) {
@@ -144,7 +177,7 @@ function ensureTrackedDirectory(directoryPath, boundaryPath, allowedExisting, cr
     if (!current.isDirectory() || current.isSymbolicLink()) {
       throw new Error(`Install collision: directory is a symlink or junction at ${resolvedDirectory}`);
     }
-    if (recorded && !samePathIdentity(current, recorded.identity)) {
+    if (recorded && !samePathIdentity(current, getTrackedDirectoryIdentity(recorded))) {
       throw new Error(`Install collision: directory changed during install at ${resolvedDirectory}`);
     }
     if (!recorded && !allowedExisting.has(resolvedDirectory)) {
@@ -167,11 +200,36 @@ function ensureTrackedDirectory(directoryPath, boundaryPath, allowedExisting, cr
     }
     throw error;
   }
-  const identity = fs.lstatSync(resolvedDirectory, { bigint: true });
-  if (!identity.isDirectory() || identity.isSymbolicLink()) {
+  const createdIdentity = fs.lstatSync(resolvedDirectory, { bigint: true });
+  if (!createdIdentity.isDirectory() || createdIdentity.isSymbolicLink()) {
     throw new Error(`Install collision: directory changed during creation at ${resolvedDirectory}`);
   }
-  createdDirectories.push({ directoryPath: resolvedDirectory, identity });
+
+  let descriptor = null;
+  try {
+    // Keep the created directory's filesystem object alive until state
+    // publication completes. This prevents inode/file-ID reuse from making a
+    // replacement directory look like one created by this install.
+    descriptor = fs.openSync(resolvedDirectory, fs.constants.O_RDONLY);
+    const identity = fs.fstatSync(descriptor, { bigint: true });
+    const confirmed = fs.lstatSync(resolvedDirectory, { bigint: true });
+    if (
+      !identity.isDirectory()
+      || !confirmed.isDirectory()
+      || confirmed.isSymbolicLink()
+      || !samePathIdentity(identity, createdIdentity)
+      || !samePathIdentity(confirmed, identity)
+    ) {
+      throw new Error(`Install collision: directory changed while binding ownership at ${resolvedDirectory}`);
+    }
+    createdDirectories.push({ directoryPath: resolvedDirectory, identity, descriptor });
+  } catch (error) {
+    if (descriptor !== null) {
+      fs.closeSync(descriptor);
+    }
+    removeCreatedDirectoryIfUnchanged(resolvedDirectory, createdIdentity);
+    throw error;
+  }
 }
 
 function isMcpConfigPath(filePath) {
@@ -272,16 +330,20 @@ function applyEntrepreneurCodexPlan(plan) {
     }
     writeInstallState(paths.statePath, plan.statePreview, { exclusive: true });
   } catch (error) {
-    for (const createdFile of createdFiles.reverse()) {
+    for (const createdFile of [...createdFiles].reverse()) {
       removeCreatedFileIfUnchanged(createdFile.filePath, createdFile.identity);
     }
-    for (const createdDirectory of createdDirectories.reverse()) {
+    for (const createdDirectory of [...createdDirectories].reverse()) {
       removeCreatedDirectoryIfUnchanged(
         createdDirectory.directoryPath,
-        createdDirectory.identity
+        getTrackedDirectoryIdentity(createdDirectory)
       );
     }
     throw error;
+  } finally {
+    for (const createdDirectory of createdDirectories) {
+      closeTrackedDirectory(createdDirectory);
+    }
   }
 
   return { ...plan, applied: true };

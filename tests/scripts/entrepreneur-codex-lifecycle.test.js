@@ -157,7 +157,9 @@ test('preserves a late state collision while rolling back newly copied files', (
   withTempHome(homeDir => {
     const plan = makePlan(homeDir);
     const originalOpen = fs.openSync;
+    const originalClose = fs.closeSync;
     let remainingCreates = plan.operations.length;
+    let stateCollisionCreated = false;
     fs.openSync = (...args) => {
       const isManagedDestination = plan.operations.some(operation => (
         path.resolve(operation.destinationPath) === path.resolve(args[0])
@@ -165,9 +167,19 @@ test('preserves a late state collision while rolling back newly copied files', (
       if (isManagedDestination) {
         remainingCreates -= 1;
       }
-      if (remainingCreates === 0) {
+      if (remainingCreates === 0 && !stateCollisionCreated) {
+        stateCollisionCreated = true;
         fs.mkdirSync(path.dirname(statePath(homeDir)), { recursive: true });
-        fs.writeFileSync(statePath(homeDir), 'concurrent-state');
+        const descriptor = originalOpen(
+          statePath(homeDir),
+          fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL,
+          0o600,
+        );
+        try {
+          fs.writeSync(descriptor, 'concurrent-state');
+        } finally {
+          originalClose(descriptor);
+        }
       }
       return originalOpen(...args);
     };
@@ -228,6 +240,51 @@ test('rollback preserves an empty managed directory replaced before state public
     assert.ok(fs.existsSync(replacedDirectory));
     assert.deepStrictEqual(fs.readdirSync(replacedDirectory), []);
     assert.ok(!fs.existsSync(statePath(homeDir)));
+  });
+});
+
+test('keeps created directory identity handles open through state publication', () => {
+  withTempHome(homeDir => {
+    const plan = makePlan(homeDir);
+    const originalOpen = fs.openSync;
+    const originalClose = fs.closeSync;
+    const originalLink = fs.linkSync;
+    const heldDirectoryDescriptors = new Set();
+    let observedHeldDirectory = false;
+
+    fs.openSync = (targetPath, ...args) => {
+      const descriptor = originalOpen(targetPath, ...args);
+      try {
+        if (
+          path.resolve(String(targetPath)).startsWith(`${path.resolve(homeDir)}${path.sep}`)
+          && fs.statSync(targetPath).isDirectory()
+        ) {
+          heldDirectoryDescriptors.add(descriptor);
+        }
+      } catch (_error) {
+        // Non-directory opens are irrelevant to this ownership-handle check.
+      }
+      return descriptor;
+    };
+    fs.closeSync = descriptor => {
+      heldDirectoryDescriptors.delete(descriptor);
+      return originalClose(descriptor);
+    };
+    fs.linkSync = () => {
+      observedHeldDirectory = heldDirectoryDescriptors.size > 0;
+      throw new Error('simulated state publication failure');
+    };
+
+    try {
+      assert.throws(() => applyInstallPlan(plan), /simulated state publication failure/i);
+    } finally {
+      fs.openSync = originalOpen;
+      fs.closeSync = originalClose;
+      fs.linkSync = originalLink;
+    }
+
+    assert.strictEqual(observedHeldDirectory, true);
+    assert.strictEqual(heldDirectoryDescriptors.size, 0);
   });
 });
 
