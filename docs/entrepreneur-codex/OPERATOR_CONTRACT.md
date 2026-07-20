@@ -9,19 +9,21 @@ These permissions apply only to authorized local files and repository material. 
 - Reading
 - Explaining
 - Planning
-- Local branch and worktree creation
+- Local branch creation
 - Coding inside an authorized slice
 - Tests
 - Documentation
 - Draft pull-request preparation
 
+Automatic permission to prepare repository changes remains subject to the [Codex Project and Session Topology](PROJECT_SESSION_TOPOLOGY.md). It does not bypass that contract or grant merge authority.
+
 ## Operator approval required
 
 - Merge
 - Production deployment
-- Real customer-data use
+- Real customer-data use, subject to the separate approval gate in the [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md)
 - Email sending
-- Applied EPIC writes
+- Writes to [Applied EPIC](INSURANCE_KNOWLEDGE_ARCHITECTURE.md#authority), the insurance agency management system used as the official account and activity record
 - Authentication or authorization changes
 - Secrets
 - Paid spending
