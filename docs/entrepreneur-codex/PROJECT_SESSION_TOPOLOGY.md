@@ -9,9 +9,7 @@ This contract defines where work belongs before the lightweight Entrepreneur ECC
 | Codex Project | The persistent room for one repository or operating area. It holds the relevant root, instructions, and task history. |
 | Thread | One focused outcome inside a Project. A thread is temporary working context, not durable business memory. |
 | Worktree | An isolated Git workbench for an authorized code or documentation change. It is not needed for read-only work or ordinary operating tasks. |
-| ECC Skill | A repeatable workflow loaded when a task needs it. The durable workflow belongs in ECC's native `skills/` surface. |
-| MCP or connector | Controlled access to another system. It supplies tools or data but does not grant authority to act. |
-| Private knowledge layer | Durable business memory and evidence references kept outside Git. New task threads retrieve the relevant account history and approved processes from it. |
+| Private knowledge layer | Durable business memory and evidence references kept outside Git. New task threads retrieve the relevant account history and Approved processes from it. |
 
 ECC's native `ecc.session.v1` snapshots may later report runtime, worker, branch, and worktree status. They are execution telemetry, not a replacement for Codex Projects, focused threads, or durable business memory.
 
