@@ -10,6 +10,9 @@ const {
   PROFILE_ID: ENTREPRENEUR_PROFILE_ID,
   assertMatchingState,
   assertProfilePlan,
+  copyFileExclusiveWithinTrustedRoot,
+  removeCreatedDirectoryIfUnchanged,
+  removeCreatedFileIfUnchanged,
 } = require('../entrepreneur-codex-profile');
 
 function isMarkdownPath(filePath) {
@@ -112,6 +115,65 @@ function findHooksSourcePath(plan, hooksDestinationPath) {
   return operation ? operation.sourcePath : null;
 }
 
+function samePathIdentity(left, right) {
+  return Boolean(left)
+    && Boolean(right)
+    && left.dev === right.dev
+    && left.ino === right.ino
+    && (
+      typeof left.birthtimeMs !== 'number'
+      || typeof right.birthtimeMs !== 'number'
+      || left.birthtimeMs === right.birthtimeMs
+    );
+}
+
+function ensureTrackedDirectory(directoryPath, boundaryPath, allowedExisting, createdDirectories) {
+  const resolvedDirectory = path.resolve(directoryPath);
+  const resolvedBoundary = path.resolve(boundaryPath);
+  if (resolvedDirectory === resolvedBoundary) {
+    return;
+  }
+  const relative = path.relative(resolvedBoundary, resolvedDirectory);
+  if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error(`Install collision: directory escapes the approved home at ${resolvedDirectory}`);
+  }
+
+  const recorded = createdDirectories.find(entry => entry.directoryPath === resolvedDirectory);
+  if (fs.existsSync(resolvedDirectory)) {
+    const current = fs.lstatSync(resolvedDirectory, { bigint: true });
+    if (!current.isDirectory() || current.isSymbolicLink()) {
+      throw new Error(`Install collision: directory is a symlink or junction at ${resolvedDirectory}`);
+    }
+    if (recorded && !samePathIdentity(current, recorded.identity)) {
+      throw new Error(`Install collision: directory changed during install at ${resolvedDirectory}`);
+    }
+    if (!recorded && !allowedExisting.has(resolvedDirectory)) {
+      throw new Error(`Install collision: unexpected directory appeared at ${resolvedDirectory}`);
+    }
+    return;
+  }
+
+  ensureTrackedDirectory(
+    path.dirname(resolvedDirectory),
+    resolvedBoundary,
+    allowedExisting,
+    createdDirectories
+  );
+  try {
+    fs.mkdirSync(resolvedDirectory);
+  } catch (error) {
+    if (error.code === 'EEXIST') {
+      throw new Error(`Install collision: directory appeared at ${resolvedDirectory}`);
+    }
+    throw error;
+  }
+  const identity = fs.lstatSync(resolvedDirectory, { bigint: true });
+  if (!identity.isDirectory() || identity.isSymbolicLink()) {
+    throw new Error(`Install collision: directory changed during creation at ${resolvedDirectory}`);
+  }
+  createdDirectories.push({ directoryPath: resolvedDirectory, identity });
+}
+
 function isMcpConfigPath(filePath) {
   const basename = path.basename(String(filePath || ''));
   return basename === '.mcp.json' || basename === 'mcp.json';
@@ -165,50 +227,59 @@ function applyEntrepreneurCodexPlan(plan) {
   }
 
   const createdFiles = [];
-  const createdSkillDirectories = [];
+  const createdDirectories = [];
+  const agentsRoot = path.dirname(paths.skillsRoot);
   const candidateParentDirectories = [
+    agentsRoot,
     paths.skillsRoot,
-    path.dirname(paths.skillsRoot),
     paths.codexRoot,
   ];
-  const newlyCreatedParentDirectories = candidateParentDirectories.filter(directory => !fs.existsSync(directory));
+  const allowedExistingDirectories = new Set([
+    paths.homeDir,
+    ...candidateParentDirectories.filter(directory => fs.existsSync(directory)),
+  ].map(directory => path.resolve(directory)));
   try {
+    for (const directory of candidateParentDirectories) {
+      ensureTrackedDirectory(
+        directory,
+        paths.homeDir,
+        allowedExistingDirectories,
+        createdDirectories
+      );
+    }
     for (const skillDirectory of paths.skillDirectories) {
-      fs.mkdirSync(path.dirname(skillDirectory), { recursive: true });
-      fs.mkdirSync(skillDirectory);
-      createdSkillDirectories.push(skillDirectory);
+      ensureTrackedDirectory(
+        skillDirectory,
+        paths.homeDir,
+        allowedExistingDirectories,
+        createdDirectories
+      );
     }
     for (const operation of plan.operations) {
-      fs.mkdirSync(path.dirname(operation.destinationPath), { recursive: true });
-      fs.copyFileSync(operation.sourcePath, operation.destinationPath, fs.constants.COPYFILE_EXCL);
-      createdFiles.push(operation.destinationPath);
+      ensureTrackedDirectory(
+        path.dirname(operation.destinationPath),
+        paths.homeDir,
+        allowedExistingDirectories,
+        createdDirectories
+      );
+      const createdFile = copyFileExclusiveWithinTrustedRoot(
+        operation.sourcePath,
+        operation.destinationPath,
+        paths.skillsRoot,
+        'install'
+      );
+      createdFiles.push(createdFile);
     }
     writeInstallState(paths.statePath, plan.statePreview, { exclusive: true });
   } catch (error) {
     for (const createdFile of createdFiles.reverse()) {
-      fs.rmSync(createdFile, { force: true });
-      let currentDirectory = path.dirname(createdFile);
-      while (currentDirectory !== paths.skillsRoot && fs.existsSync(currentDirectory)) {
-        if (fs.readdirSync(currentDirectory).length > 0) {
-          break;
-        }
-        fs.rmdirSync(currentDirectory);
-        currentDirectory = path.dirname(currentDirectory);
-      }
+      removeCreatedFileIfUnchanged(createdFile.filePath, createdFile.identity);
     }
-    for (const skillDirectory of createdSkillDirectories.reverse()) {
-      if (fs.existsSync(skillDirectory) && fs.readdirSync(skillDirectory).length === 0) {
-        fs.rmdirSync(skillDirectory);
-      }
-    }
-    for (const directory of newlyCreatedParentDirectories) {
-      if (!fs.existsSync(directory)) {
-        continue;
-      }
-      const stat = fs.lstatSync(directory);
-      if (stat.isDirectory() && !stat.isSymbolicLink() && fs.readdirSync(directory).length === 0) {
-        fs.rmdirSync(directory);
-      }
+    for (const createdDirectory of createdDirectories.reverse()) {
+      removeCreatedDirectoryIfUnchanged(
+        createdDirectory.directoryPath,
+        createdDirectory.identity
+      );
     }
     throw error;
   }

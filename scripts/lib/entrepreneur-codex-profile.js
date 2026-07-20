@@ -45,6 +45,118 @@ function assertTrustedRoots(paths, action) {
   assertWithinTrustedRoot(paths.statePath, paths.codexRoot, action);
 }
 
+function sameFileIdentity(left, right) {
+  return Boolean(left)
+    && Boolean(right)
+    && left.dev === right.dev
+    && left.ino === right.ino
+    && (
+      typeof left.birthtimeMs !== 'number'
+      || typeof right.birthtimeMs !== 'number'
+      || left.birthtimeMs === right.birthtimeMs
+    );
+}
+
+function removeCreatedFileIfUnchanged(filePath, identity) {
+  try {
+    const current = fs.lstatSync(filePath, { bigint: true });
+    if (sameFileIdentity(current, identity)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+}
+
+function removeCreatedDirectoryIfUnchanged(directoryPath, identity) {
+  try {
+    const current = fs.lstatSync(directoryPath, { bigint: true });
+    if (
+      !sameFileIdentity(current, identity)
+      || !current.isDirectory()
+      || current.isSymbolicLink()
+    ) {
+      return;
+    }
+
+    const confirmed = fs.lstatSync(directoryPath, { bigint: true });
+    if (
+      sameFileIdentity(confirmed, identity)
+      && confirmed.isDirectory()
+      && !confirmed.isSymbolicLink()
+    ) {
+      fs.rmdirSync(directoryPath);
+    }
+  } catch (error) {
+    if (!['ENOENT', 'ENOTEMPTY', 'EEXIST'].includes(error.code)) {
+      throw error;
+    }
+  }
+}
+
+function copyFileExclusiveWithinTrustedRoot(sourcePath, destinationPath, trustedRoot, action) {
+  const sourceStat = fs.statSync(sourcePath);
+  if (!sourceStat.isFile()) {
+    throw new Error(`Missing source file for ${action}: ${sourcePath}`);
+  }
+  const content = fs.readFileSync(sourcePath);
+  assertWithinTrustedRoot(destinationPath, trustedRoot, action);
+
+  let descriptor = null;
+  let identity = null;
+  let failure = null;
+  try {
+    descriptor = fs.openSync(
+      destinationPath,
+      fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL,
+      sourceStat.mode & 0o777
+    );
+    identity = fs.fstatSync(descriptor, { bigint: true });
+
+    // The exclusive open protects the leaf. Re-resolve the now-existing path
+    // and bind it to the opened file before any managed content is written so
+    // a late parent junction or symlink swap fails closed.
+    assertWithinTrustedRoot(destinationPath, trustedRoot, action);
+    const openedPathIdentity = fs.statSync(destinationPath, { bigint: true });
+    if (!sameFileIdentity(openedPathIdentity, identity)) {
+      throw new Error(`Refusing ${action}: destination changed during exclusive creation`);
+    }
+
+    fs.writeFileSync(descriptor, content);
+    fs.fsyncSync(descriptor);
+
+    assertWithinTrustedRoot(destinationPath, trustedRoot, action);
+    const writtenPathIdentity = fs.statSync(destinationPath, { bigint: true });
+    if (!sameFileIdentity(writtenPathIdentity, identity)) {
+      throw new Error(`Refusing ${action}: destination changed while writing managed content`);
+    }
+  } catch (error) {
+    failure = error;
+  } finally {
+    if (descriptor !== null) {
+      try {
+        fs.closeSync(descriptor);
+      } catch (error) {
+        failure = failure || error;
+      }
+    }
+  }
+
+  if (failure) {
+    if (identity) {
+      try {
+        removeCreatedFileIfUnchanged(destinationPath, identity);
+      } catch (cleanupError) {
+        throw new Error(`${failure.message}; failed to remove the incomplete managed file: ${cleanupError.message}`);
+      }
+    }
+    throw failure;
+  }
+  return { filePath: destinationPath, identity };
+}
+
 function assertManagedOperation(operation, paths, action) {
   if (!MODULE_IDS.includes(operation.moduleId)) {
     throw new Error(`Invalid ${PROFILE_ID} state: unexpected module ${operation.moduleId}`);
@@ -162,7 +274,10 @@ module.exports = {
   SKILL_IDS,
   assertMatchingState,
   assertProfilePlan,
+  copyFileExclusiveWithinTrustedRoot,
   getPaths,
   hasManagedArtifacts,
   listLegacyArtifacts,
+  removeCreatedDirectoryIfUnchanged,
+  removeCreatedFileIfUnchanged,
 };

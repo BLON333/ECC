@@ -1,6 +1,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { PROFILE_ID: ENTREPRENEUR_PROFILE_ID } = require('./entrepreneur-codex-profile');
 const { getInstallTargetAdapter, planInstallTargetScaffold } = require('./install-targets/registry');
 
 const DEFAULT_REPO_ROOT = path.join(__dirname, '../..');
@@ -572,6 +573,17 @@ function resolveInstallPlan(options = {}) {
   if (target && !SUPPORTED_INSTALL_TARGETS.includes(target)) {
     throw new Error(
       `Unknown install target: ${target}. Expected one of ${SUPPORTED_INSTALL_TARGETS.join(', ')}`
+    );
+  }
+
+  if (
+    requestedProfileId === ENTREPRENEUR_PROFILE_ID
+    && (explicitModuleIds.length > 0
+      || includedComponentIds.length > 0
+      || excludedComponentIds.length > 0)
+  ) {
+    throw new Error(
+      `Install profile ${ENTREPRENEUR_PROFILE_ID} is fixed and cannot be combined with module or component request modifiers`
     );
   }
 

@@ -156,26 +156,78 @@ test('rolls back only newly created managed files after a partial failure', () =
 test('preserves a late state collision while rolling back newly copied files', () => {
   withTempHome(homeDir => {
     const plan = makePlan(homeDir);
-    const originalCopy = fs.copyFileSync;
-    let remainingCopies = plan.operations.length;
-    fs.copyFileSync = (...args) => {
-      const result = originalCopy(...args);
-      remainingCopies -= 1;
-      if (remainingCopies === 0) {
+    const originalOpen = fs.openSync;
+    let remainingCreates = plan.operations.length;
+    fs.openSync = (...args) => {
+      const isManagedDestination = plan.operations.some(operation => (
+        path.resolve(operation.destinationPath) === path.resolve(args[0])
+      ));
+      if (isManagedDestination) {
+        remainingCreates -= 1;
+      }
+      if (remainingCreates === 0) {
         fs.mkdirSync(path.dirname(statePath(homeDir)), { recursive: true });
         fs.writeFileSync(statePath(homeDir), 'concurrent-state');
       }
-      return result;
+      return originalOpen(...args);
     };
     try {
       assert.throws(() => applyInstallPlan(plan), /exist|collision/i);
     } finally {
-      fs.copyFileSync = originalCopy;
+      fs.openSync = originalOpen;
     }
 
     assert.strictEqual(fs.readFileSync(statePath(homeDir), 'utf8'), 'concurrent-state');
     assert.ok(!fs.existsSync(skillPath(homeDir, 'intent-driven-development')));
     assert.ok(!fs.existsSync(skillPath(homeDir, 'agent-introspection-debugging')));
+  });
+});
+
+test('rollback preserves a managed file replaced before state publication fails', () => {
+  withTempHome(homeDir => {
+    const plan = makePlan(homeDir);
+    const replaced = plan.operations.find(operation => (
+      operation.moduleId === 'skill-intent-driven-development'
+    )).destinationPath;
+    const originalLink = fs.linkSync;
+    fs.linkSync = () => {
+      fs.rmSync(replaced);
+      fs.writeFileSync(replaced, 'concurrent-replacement');
+      throw new Error('simulated state commit failure');
+    };
+
+    try {
+      assert.throws(() => applyInstallPlan(plan), /simulated state commit failure/i);
+    } finally {
+      fs.linkSync = originalLink;
+    }
+
+    assert.strictEqual(fs.readFileSync(replaced, 'utf8'), 'concurrent-replacement');
+    assert.ok(!fs.existsSync(skillPath(homeDir, 'agent-introspection-debugging')));
+    assert.ok(!fs.existsSync(statePath(homeDir)));
+  });
+});
+
+test('rollback preserves an empty managed directory replaced before state publication fails', () => {
+  withTempHome(homeDir => {
+    const plan = makePlan(homeDir);
+    const replacedDirectory = skillPath(homeDir, 'intent-driven-development');
+    const originalLink = fs.linkSync;
+    fs.linkSync = () => {
+      fs.rmSync(replacedDirectory, { recursive: true, force: true });
+      fs.mkdirSync(replacedDirectory);
+      throw new Error('simulated state directory race');
+    };
+
+    try {
+      assert.throws(() => applyInstallPlan(plan), /simulated state directory race/i);
+    } finally {
+      fs.linkSync = originalLink;
+    }
+
+    assert.ok(fs.existsSync(replacedDirectory));
+    assert.deepStrictEqual(fs.readdirSync(replacedDirectory), []);
+    assert.ok(!fs.existsSync(statePath(homeDir)));
   });
 });
 
@@ -270,6 +322,37 @@ test('refuses symlink or junction destinations that escape the managed skill roo
   });
 });
 
+test('installer refuses a parent junction introduced immediately before destination creation', () => {
+  withTempHome(homeDir => {
+    const plan = makePlan(homeDir);
+    const firstManagedOperation = plan.operations.find(operation => (
+      operation.moduleId === 'skill-intent-driven-development'
+    ));
+    const managedDirectory = skillPath(homeDir, 'intent-driven-development');
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'ecc-entrepreneur-install-race-'));
+    const originalOpen = fs.openSync;
+    let injected = false;
+    fs.openSync = (...args) => {
+      if (!injected && path.resolve(args[0]) === path.resolve(firstManagedOperation.destinationPath)) {
+        injected = true;
+        fs.rmdirSync(managedDirectory);
+        fs.symlinkSync(outside, managedDirectory, process.platform === 'win32' ? 'junction' : 'dir');
+      }
+      return originalOpen(...args);
+    };
+
+    try {
+      assert.throws(() => applyInstallPlan(plan), /contain|escape|junction|symlink|outside/i);
+      assert.deepStrictEqual(fs.readdirSync(outside), []);
+      assert.ok(!fs.existsSync(statePath(homeDir)));
+    } finally {
+      fs.openSync = originalOpen;
+      fs.rmSync(managedDirectory, { recursive: true, force: true });
+      fs.rmSync(outside, { recursive: true, force: true });
+    }
+  });
+});
+
 test('doctor, repair, and uninstall refuse a post-install junction escape', () => {
   withTempHome(homeDir => {
     applyInstallPlan(makePlan(homeDir));
@@ -316,6 +399,84 @@ test('repair begins with dry-run, restores missing managed content, and blocks d
     const result = repairInstalledStates({ repoRoot, homeDir, projectRoot: repoRoot, targets: ['codex'], dryRun: false });
     assert.ok(result.summary.errorCount > 0);
     assert.strictEqual(fs.readFileSync(drifted, 'utf8'), before);
+  });
+});
+
+test('repair refuses a destination created after health inspection without overwriting it', () => {
+  withTempHome(homeDir => {
+    applyInstallPlan(makePlan(homeDir));
+    const missing = path.join(skillPath(homeDir, 'intent-driven-development'), 'SKILL.md');
+    fs.rmSync(missing);
+
+    const originalOpen = fs.openSync;
+    let injected = false;
+    fs.openSync = (...args) => {
+      if (!injected && path.resolve(args[0]) === path.resolve(missing)) {
+        injected = true;
+        fs.writeFileSync(missing, 'concurrent-content');
+      }
+      return originalOpen(...args);
+    };
+
+    let result;
+    try {
+      result = repairInstalledStates({
+        repoRoot,
+        homeDir,
+        projectRoot: repoRoot,
+        targets: ['codex'],
+        dryRun: false,
+      });
+    } finally {
+      fs.openSync = originalOpen;
+    }
+
+    assert.ok(result.summary.errorCount > 0);
+    assert.strictEqual(fs.readFileSync(missing, 'utf8'), 'concurrent-content');
+    assert.ok(fs.existsSync(statePath(homeDir)));
+  });
+});
+
+test('repair refuses a parent junction introduced immediately before destination creation', () => {
+  withTempHome(homeDir => {
+    applyInstallPlan(makePlan(homeDir));
+    const managedDirectory = skillPath(homeDir, 'intent-driven-development');
+    const savedDirectory = `${managedDirectory}-saved`;
+    const missing = path.join(managedDirectory, 'SKILL.md');
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), 'ecc-entrepreneur-repair-race-'));
+    fs.rmSync(missing);
+
+    const originalOpen = fs.openSync;
+    let injected = false;
+    fs.openSync = (...args) => {
+      if (!injected && path.resolve(args[0]) === path.resolve(missing)) {
+        injected = true;
+        fs.renameSync(managedDirectory, savedDirectory);
+        fs.symlinkSync(outside, managedDirectory, process.platform === 'win32' ? 'junction' : 'dir');
+      }
+      return originalOpen(...args);
+    };
+
+    let result;
+    try {
+      result = repairInstalledStates({
+        repoRoot,
+        homeDir,
+        projectRoot: repoRoot,
+        targets: ['codex'],
+        dryRun: false,
+      });
+      assert.ok(result.summary.errorCount > 0);
+      assert.deepStrictEqual(fs.readdirSync(outside), []);
+      assert.ok(fs.existsSync(statePath(homeDir)));
+    } finally {
+      fs.openSync = originalOpen;
+      fs.rmSync(managedDirectory, { recursive: true, force: true });
+      if (fs.existsSync(savedDirectory)) {
+        fs.renameSync(savedDirectory, managedDirectory);
+      }
+      fs.rmSync(outside, { recursive: true, force: true });
+    }
   });
 });
 

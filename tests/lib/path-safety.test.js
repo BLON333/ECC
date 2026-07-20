@@ -43,6 +43,30 @@ try {
     assert.strictEqual(isWithinRoot(root, root), true);
   });
 
+  test('allows a missing root and target under a symlinked existing parent', () => {
+    const realParent = fs.mkdtempSync(path.join(os.tmpdir(), 'path-safety-real-parent-'));
+    const linkedParent = `${realParent}-link`;
+    try {
+      fs.symlinkSync(realParent, linkedParent, 'dir');
+    } catch {
+      fs.rmSync(realParent, { recursive: true, force: true });
+      console.log('    (symlink unsupported on this platform; skipping)');
+      return;
+    }
+
+    try {
+      const missingRoot = path.join(linkedParent, 'home', '.codex');
+      const missingTarget = path.join(missingRoot, 'ecc-install-state.json');
+      fs.mkdirSync(path.dirname(missingRoot), { recursive: true });
+
+      assert.strictEqual(isWithinRoot(missingTarget, missingRoot), true);
+      assert.doesNotThrow(() => assertWithinTrustedRoot(missingTarget, missingRoot, 'install'));
+    } finally {
+      fs.rmSync(linkedParent, { recursive: true, force: true });
+      fs.rmSync(realParent, { recursive: true, force: true });
+    }
+  });
+
   test('refuses an absolute path outside the root', () => {
     const evil = path.join(outside, 'PWNED.txt');
     assert.throws(() => assertWithinTrustedRoot(evil, root, 'repair'), /outside the install root/);

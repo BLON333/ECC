@@ -58,6 +58,26 @@ test('refuses the entrepreneur profile for every non-Codex target', () => {
   }
 });
 
+test('refuses every request modifier that could broaden or narrow the fixed profile', () => {
+  const modifiers = [
+    { moduleIds: ['security'] },
+    { includeComponentIds: ['capability:security'] },
+    { excludeComponentIds: ['capability:security'] },
+  ];
+
+  for (const modifier of modifiers) {
+    assert.throws(
+      () => resolveInstallPlan({
+        repoRoot,
+        profileId: 'entrepreneur-codex',
+        target: 'codex',
+        ...modifier,
+      }),
+      /fixed profile|cannot be combined|request modifiers/i,
+    );
+  }
+});
+
 test('maps only the unchanged skill bodies beneath the temporary home managed skill root', () => {
   withTempHome(homeDir => {
     const plan = createManifestInstallPlan({

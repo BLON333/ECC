@@ -11,6 +11,7 @@ const { getInstallTargetAdapter, listInstallTargetAdapters } = require('./instal
 const {
   PROFILE_ID: ENTREPRENEUR_PROFILE_ID,
   assertMatchingState,
+  copyFileExclusiveWithinTrustedRoot,
   listLegacyArtifacts,
 } = require('./entrepreneur-codex-profile');
 const OPENCODE_BUILD_ARTIFACT = path.join('.opencode', 'dist');
@@ -338,7 +339,7 @@ function shouldRepairFromRecordedOperations(state) {
   return getManagedOperations(state).some(operation => operation.kind !== 'copy-file');
 }
 
-function executeRepairOperation(repoRoot, operation, trustedRoot) {
+function executeRepairOperation(repoRoot, operation, trustedRoot, options = {}) {
   // Install-state is attacker-controllable; never write/delete outside the
   // adapter-derived trusted root, regardless of what the state file claims
   // (GHSA-hfpv-w6mp-5g95).
@@ -351,7 +352,16 @@ function executeRepairOperation(repoRoot, operation, trustedRoot) {
     }
 
     ensureParentDir(operation.destinationPath);
-    fs.copyFileSync(sourcePath, operation.destinationPath);
+    if (options.exclusive) {
+      copyFileExclusiveWithinTrustedRoot(
+        sourcePath,
+        operation.destinationPath,
+        trustedRoot,
+        'repair'
+      );
+    } else {
+      fs.copyFileSync(sourcePath, operation.destinationPath);
+    }
     return;
   }
 
@@ -1146,7 +1156,8 @@ function repairInstalledStates(options = {}) {
           executeRepairOperation(
             context.repoRoot,
             operation,
-            entrepreneurPaths ? entrepreneurPaths.skillsRoot : record.targetRoot
+            entrepreneurPaths ? entrepreneurPaths.skillsRoot : record.targetRoot,
+            { exclusive: entrepreneurCandidate }
           );
         }
         writeInstallState(desiredPlan.installStatePath, desiredPlan.statePreview);
