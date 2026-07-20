@@ -26,7 +26,7 @@ Each contract has one normative responsibility. Summaries and cross-references d
 | Worktree | An isolated Git workbench for an authorized writing task. It is temporary execution space, not a Codex Project. |
 | ECC Skill | A repeatable workflow loaded when a task needs it. The durable workflow belongs in ECC's native `skills/` surface. |
 | MCP or connector | Controlled access to another system. It supplies tools or data but does not grant authority to act. |
-| Insurance Desk workspace | Proposed Obsidian-first curated operational memory and evidence references outside Git. It is not a repository, worktree, or system of record. |
+| Insurance Desk workspace | Active private operating area and intended Obsidian vault at `C:\Insurance Desk\Insurance Desk`. It is outside Git and is not a repository, worktree, or system of record. |
 
 ECC's native `ecc.session.v1` snapshots may later report runtime, worker, branch, and worktree status. They are execution telemetry, not a replacement for Codex Projects, focused threads, or durable business memory.
 
@@ -38,12 +38,12 @@ These are the intended Project boundaries. Naming a Project here does not create
 |---|---|---|
 | ECC | `C:\DevV2\ECC` | Maintain the shared lightweight capability and operating contracts. |
 | Insurance Ops — Build | `C:\DevV2\automations\insurance-ops` | Build, test, and improve the insurance-assistance software. It contains software, not live client working memory. |
-| Insurance Desk — Operate | Future approved private operating workspace | Support assist-only insurance work from source materials, account history, Approved processes, and generated drafts. |
+| Insurance Desk — Operate | `C:\Insurance Desk\Insurance Desk` | Active private operating area for assist-only insurance work from source materials, account history, Approved processes, and generated drafts. It may become the Codex Project boundary after local Obsidian and Project configuration is stabilized. |
 | Future Product | A separate repository and Project, only when a real product exists | Build that product without mixing it into ECC or insurance operations. |
 
 **Insurance Ops — Build** and **Insurance Desk — Operate** are deliberately separate. Build changes the software. Operate uses approved software and private evidence to prepare real work. Build has no implied access to client data, and Operate has no implied authority to change software or perform an external action.
 
-Insurance Desk — Operate is a future approved private operating workspace. It is not an Insurance Ops — Build worktree or part of the software repository. It is not created by this slice.
+`C:\Insurance Desk\Insurance Desk` is the operator-designated active private Insurance Desk content tree and intended Obsidian operating vault. It is not an Insurance Ops — Build worktree or part of the software repository. Its possible use as the Insurance Desk — Operate Codex Project remains pending local Obsidian and Project configuration stabilization. This documentation correction does not create, inspect, configure, or modify that workspace.
 
 ## Operating rules
 

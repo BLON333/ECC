@@ -1,15 +1,14 @@
 # Insurance Knowledge Architecture
 
-This contract defines a proposed future Insurance Desk workspace for assist-only insurance work. It separates live working data from the private insurance-assistance software repository. No directory, database, connector, or ingestion runtime is created or configured by this slice.
+This contract defines the operator-designated active private Insurance Desk workspace for assist-only insurance work. It separates local live working data from insurance-assistance software and Git. This documentation correction does not create, inspect, migrate, reorganize, or configure the workspace, its contents, a database, a connector, or an ingestion runtime.
 
 ## Status and location
 
-The workspace root must be configurable through `INSURANCE_DESK_HOME`.
+- Active private content tree and intended Obsidian operating vault: `C:\Insurance Desk\Insurance Desk`
+- Selected boundary for Insurance Desk — Operate: `C:\Insurance Desk\Insurance Desk`
+- Possible future Codex Project boundary: the same content tree, after local Obsidian and Project configuration is stabilized
 
-- Provisional local default: `C:\InsuranceDesk`
-- Final location: subject to organization-approved storage and AI handling
-
-The default and structure below are a proposed starting direction, not an accepted final storage decision. This slice does not create `C:\InsuranceDesk`, set `INSURANCE_DESK_HOME`, or modify `C:\DevV2\_private-data`.
+The `.obsidian` directory currently located at `C:\Insurance Desk\.obsidian` is a configuration-placement issue to reconcile separately; it does not invalidate the selected content tree. `C:\Insurance Desk\Vault` is an empty placeholder, not the intended active vault. This contract records the operator's designation and does not claim employer, regulatory, insurer, or third-party approval that has not been evidenced.
 
 ## Authority
 
@@ -17,12 +16,12 @@ The default and structure below are a proposed starting direction, not an accept
 |---|---|
 | Applied EPIC | Official account and activity record. The operator performs and confirms every live action there. |
 | Outlook and original documents | Communication and documentary evidence whose identity, date, and provenance must be retained. |
-| Obsidian Vault | Curated operational memory for retrieval, drafting, and review. It does not replace Applied EPIC or original source evidence. |
+| Insurance Desk in Obsidian | Curated human-readable and AI-readable operating memory for retrieval, drafting, and review. It does not replace Applied EPIC, Outlook, or original source evidence. |
 | Generated state | Optional derived indexes for retrieval. Generated state is rebuildable and is never an editable source of authority. |
 | Conversations | Temporary working context, not durable account memory or process approval. |
 | GitHub | Authority for software and repository documentation only; it never stores private client material. |
 
-Every material fact must retain its source reference, observed or confirmed date, and verification status. Verified facts must remain distinguishable from AI interpretation and recommendations. Memory updates are proposed for operator review rather than silently accepted.
+Every material fact must retain its source reference, observed or confirmed date, and verification status. Verified facts must remain distinguishable from AI interpretation, generated summaries, and recommendations. Memory updates are proposed for operator review rather than silently overwriting or replacing account history.
 
 ## A. Account and client memory
 
@@ -56,9 +55,53 @@ Process knowledge records how the organization has decided work should be perfor
 
 Only **Approved** process knowledge may drive a workflow. Each process should record its owner, reviewer, effective date, evidence, version, and any process it supersedes.
 
-## Synthetic and sanitized fixture standard
+## Current knowledge model
 
-Synthetic fixtures are the default for the first insurance pilot. They are invented from scratch, are not derived by lightly editing a real client file, and contain no real client, prospect, employee, insurer, underwriter, account, policy, claim, quote, submission, location, project, credential, or communication data.
+The permanent knowledge model is account-centred and uses these top-level areas inside `C:\Insurance Desk\Insurance Desk`:
+
+| Area | Purpose |
+|---|---|
+| `Accounts` | Current account briefs; client and prospect history; contacts, locations, operations, policies, renewals, submissions, quotes, commitments, strategy, and evidence references. |
+| `Events` | Dated emails, calls, documents, decisions, quotes, submissions, commitments, and material changes. |
+| `Organization` | Approved and pending processes, forms, carrier guidance, standards, and reference material. |
+| `Drafts` | Proposed Applied EPIC notes, email drafts, recommendations, follow-up lists, and checklists awaiting human review. |
+| `System` | Vault contract, data boundaries, ingestion register, and current operating state. |
+| `Raw Data` | Intentionally placed temporary ingestion sources—including historical client context, organization procedures, documents, and other source material—awaiting classification, incorporation, and verification. It is not the permanent memory architecture. |
+
+This model describes the intended organization; this documentation slice does not create, enumerate, or change any of these areas.
+
+## Raw Data ingestion lifecycle
+
+Each source or source folder moves through a controlled lifecycle:
+
+```text
+Unreviewed
+→ Processing
+→ Incorporated
+→ Verified
+→ Safe to Remove or Archive
+```
+
+- **Unreviewed** identifies intentionally placed material whose contents and classification have not yet been assessed.
+- **Processing** means incorporation is underway and the source remains temporary evidence.
+- **Incorporated** means permanent account, event, organization, draft, or system notes have been created or updated with provenance.
+- **Verified** means the resulting knowledge, source references, and classification have been reviewed.
+- **Safe to Remove or Archive** is a reviewed disposition recorded after verification; it is not deletion authority by itself.
+
+Incorporation is recorded in `System\INGESTION_REGISTER.md`. For each source or source folder, the register identifies:
+
+- the source or source folder;
+- its account, process, or knowledge classification;
+- permanent notes created or updated;
+- verification status;
+- whether the original evidence remains available in Outlook, Applied EPIC, or another authoritative source; and
+- whether the temporary local copy may be removed or archived.
+
+The register is part of the intended operating model but is not created by this documentation slice. Original sources remain available until verification and an explicit reviewed disposition establish that a temporary copy may be removed or archived.
+
+## Software-development fixture standard
+
+Synthetic fixtures are the default for testing and developing the first insurance-assistance software pilot in Git. This fixture restriction does not prohibit operator-designated private assist-only use of real working material inside the active Insurance Desk. Synthetic fixtures are invented from scratch, are not derived by lightly editing a real client file, and contain no real client, prospect, employee, insurer, underwriter, account, policy, claim, quote, submission, location, project, credential, or communication data.
 
 A source-derived fixture may be called sanitized only after a documented human review. Merely replacing the client name is not sufficient. Sanitization must remove or fictionalize:
 
@@ -80,35 +123,33 @@ Each fixture record must state whether the fixture is synthetic or sanitized, it
 
 When there is doubt, use a fully synthetic fixture instead. No real or source-derived fixture is created, copied, opened, or added during this PR.
 
-## Proposed Insurance Desk structure
+## Active local use and approval boundaries
 
-```text
-C:\InsuranceDesk\
-├── Vault\
-│   ├── Accounts\
-│   ├── Events\
-│   ├── Processes\
-│   ├── Work Queue\
-│   ├── Drafts\
-│   └── Templates\
-├── Sources\
-│   └── Accounts\
-├── State\
-│   └── index.sqlite
-├── Exports\
-└── Archive\
-```
+The operator has designated `C:\Insurance Desk\Insurance Desk` for private, local, assist-only work with intentionally placed real insurance material. Local real-data use is not blocked merely because the workspace is under `C:\Insurance Desk`. This operator designation does not imply unevidenced organization, regulatory, insurer, or third-party approval.
 
-- `Vault/` is an Obsidian-first, human-readable working-memory cockpit. Its account notes, events, processes, work queue, drafts, and templates remain curated views linked to evidence rather than an official system of record.
-- `Sources/` holds original evidence outside the vault, organized by account and retaining source provenance.
-- `State/index.sqlite` is optional, generated, and rebuildable later. It is not the initial editable authority, and its absence does not block the human-readable workspace.
-- `Exports/` holds operator-approved work packages prepared for an authorized downstream action.
-- `Archive/` retains superseded or closed material only under an approved retention process.
+The following remain prohibited without separate exact authority:
 
-## Future ingestion and connections
+- client or private insurance data entering Git;
+- unapproved cloud synchronization or external data transport;
+- autonomous email sending, filing, flags, categories, or mailbox changes;
+- autonomous Applied EPIC writes;
+- autonomous binding or coverage advice;
+- silent overwriting or replacement of account history; and
+- treating generated summaries, drafts, or recommendations as official evidence.
 
-No real client data may be used until storage, backup, retention, device security, AI-processing arrangements, permissions, and operating controls are separately approved. Any earlier pilot uses only fixtures that meet the synthetic and sanitized fixture standard above.
+Applied EPIC remains the official account and activity record. Outlook and original documents remain communication and documentary evidence. The Insurance Desk remains curated operating memory and a drafting surface, not a replacement for those sources.
 
-If real-data ingestion is later approved, possible routes include exported emails, pasted messages, uploaded documents, and manually confirmed outcomes. Ingestion must preserve the business-account anchor, source provenance, received or confirmed date, and any verification uncertainty.
+## Accepted future work-email direction
 
-Future permitted connectors must preserve this architecture: evidence lands as a source, curated memory points back to it, only Approved processes drive workflows, and Applied EPIC remains the official account and activity record. A connector may reduce manual transport; it may not silently change authority, verification status, or approval.
+Future work-email automation should use a two-plane architecture:
+
+- Microsoft 365 is the mailbox-monitoring and mailbox-action plane.
+- The private Insurance Desk is the account-memory, process, reasoning, and drafting plane.
+- The planes communicate only through an explicitly approved, provenance-preserving structured work-packet bridge.
+- Initial transport remains manual.
+
+This accepted target direction constrains later design but does not authorize mailbox access, a connector, cloud synchronization, flags, categories, drafts, sends, or any external action. Detailed queue, transport, permissions, storage, synchronization, and connector design belongs to a later private Insurance Ops slice using synthetic fixtures for software development.
+
+## Deferred generated retrieval state
+
+SQLite remains optional, generated, rebuildable, and deferred. Any future index must remain derived from the human-readable knowledge and source references, never become editable authority, and receive its own separately authorized design. No database is created or configured by this documentation slice.
