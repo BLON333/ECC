@@ -8,6 +8,11 @@ const { readInstallState, writeInstallState } = require('./install-state');
 const { assertWithinTrustedRoot } = require('./path-safety');
 const { createManifestInstallPlan } = require('./install-executor');
 const { getInstallTargetAdapter, listInstallTargetAdapters } = require('./install-targets/registry');
+const {
+  PROFILE_ID: ENTREPRENEUR_PROFILE_ID,
+  assertMatchingState,
+  listLegacyArtifacts,
+} = require('./entrepreneur-codex-profile');
 const OPENCODE_BUILD_ARTIFACT = path.join('.opencode', 'dist');
 const OPENCODE_BUILD_SCRIPT = path.join('scripts', 'build-opencode.js');
 const OPENCODE_PLUGIN_NOT_BUILT_CODE = 'opencode-plugin-not-built';
@@ -36,6 +41,30 @@ function normalizeTargets(targets) {
     }
   }
 
+  return normalizedTargets;
+}
+
+function normalizeLifecycleProfileId(profileId) {
+  if (profileId === null || profileId === undefined) {
+    return null;
+  }
+  if (typeof profileId !== 'string' || profileId.trim() === '') {
+    throw new Error('Lifecycle profile must be a non-empty string');
+  }
+  if (profileId !== ENTREPRENEUR_PROFILE_ID) {
+    throw new Error(`Unsupported lifecycle profile: ${profileId}`);
+  }
+  return profileId;
+}
+
+function resolveLifecycleTargets(targets, profileId) {
+  const hasExplicitTargets = Array.isArray(targets) && targets.length > 0;
+  const normalizedTargets = profileId && !hasExplicitTargets
+    ? ['codex']
+    : normalizeTargets(targets);
+  if (profileId && normalizedTargets.some(target => target !== 'codex')) {
+    throw new Error(`${profileId} lifecycle operations only support the Codex target`);
+  }
   return normalizedTargets;
 }
 
@@ -670,7 +699,8 @@ function buildDiscoveryRecord(adapter, context) {
       installStatePath,
       exists: false,
       state: null,
-      error: null
+      error: null,
+      required: context.profileId === ENTREPRENEUR_PROFILE_ID && adapter.target === 'codex'
     };
   }
 
@@ -686,7 +716,8 @@ function buildDiscoveryRecord(adapter, context) {
       installStatePath,
       exists: true,
       state,
-      error: null
+      error: null,
+      required: context.profileId === ENTREPRENEUR_PROFILE_ID && adapter.target === 'codex'
     };
   } catch (error) {
     return {
@@ -699,22 +730,36 @@ function buildDiscoveryRecord(adapter, context) {
       installStatePath,
       exists: true,
       state: null,
-      error: error.message
+      error: error.message,
+      required: context.profileId === ENTREPRENEUR_PROFILE_ID && adapter.target === 'codex'
     };
   }
 }
 
 function discoverInstalledStates(options = {}) {
+  const profileId = normalizeLifecycleProfileId(options.profileId);
   const context = {
     homeDir: options.homeDir || process.env.HOME || os.homedir(),
-    projectRoot: options.projectRoot || process.cwd()
+    projectRoot: options.projectRoot || process.cwd(),
+    profileId,
   };
-  const targets = normalizeTargets(options.targets);
+  const targets = resolveLifecycleTargets(options.targets, profileId);
 
   return targets.map(target => {
     const adapter = getInstallTargetAdapter(target);
     return buildDiscoveryRecord(adapter, context);
   });
+}
+
+function isEntrepreneurCandidate(record, context) {
+  if (record.adapter.target !== 'codex') {
+    return false;
+  }
+  if (record.state) {
+    return context.profileId === ENTREPRENEUR_PROFILE_ID
+      || record.state.request?.profile === ENTREPRENEUR_PROFILE_ID;
+  }
+  return context.profileId === ENTREPRENEUR_PROFILE_ID;
 }
 
 function buildIssue(severity, code, message, extra = {}) {
@@ -752,11 +797,32 @@ function analyzeRecord(record, context) {
 
   const state = record.state;
   if (!state) {
+    if (isEntrepreneurCandidate(record, context)) {
+      issues.push(buildIssue(
+        'error',
+        'missing-entrepreneur-codex-state',
+        `No valid matching ${ENTREPRENEUR_PROFILE_ID} install-state is available`
+      ));
+    }
     return {
       ...record,
-      status: 'missing',
+      status: determineStatus(issues) === 'ok' ? 'missing' : determineStatus(issues),
       issues
     };
+  }
+
+  const entrepreneurCandidate = isEntrepreneurCandidate(record, context);
+  if (entrepreneurCandidate) {
+    try {
+      assertMatchingState(state, context.homeDir, 'doctor');
+    } catch (error) {
+      issues.push(buildIssue('error', 'entrepreneur-codex-state-mismatch', error.message));
+      return {
+        ...record,
+        status: determineStatus(issues),
+        issues
+      };
+    }
   }
 
   if (!fs.existsSync(state.target.root)) {
@@ -765,7 +831,7 @@ function analyzeRecord(record, context) {
 
   if (state.target.root !== record.targetRoot) {
     issues.push(
-      buildIssue('warning', 'target-root-mismatch', `Recorded target root differs from current target root (${record.targetRoot})`, {
+      buildIssue(entrepreneurCandidate ? 'error' : 'warning', 'target-root-mismatch', `Recorded target root differs from current target root (${record.targetRoot})`, {
         recordedTargetRoot: state.target.root,
         currentTargetRoot: record.targetRoot
       })
@@ -774,7 +840,7 @@ function analyzeRecord(record, context) {
 
   if (state.target.installStatePath !== record.installStatePath) {
     issues.push(
-      buildIssue('warning', 'install-state-path-mismatch', `Recorded install-state path differs from current path (${record.installStatePath})`, {
+      buildIssue(entrepreneurCandidate ? 'error' : 'warning', 'install-state-path-mismatch', `Recorded install-state path differs from current path (${record.installStatePath})`, {
         recordedInstallStatePath: state.target.installStatePath,
         currentInstallStatePath: record.installStatePath
       })
@@ -795,7 +861,7 @@ function analyzeRecord(record, context) {
 
   if (operationHealth.drifted.length > 0) {
     issues.push(
-      buildIssue('warning', 'drifted-managed-files', `${operationHealth.drifted.length} managed file(s) differ from the source repo`, {
+      buildIssue(entrepreneurCandidate ? 'error' : 'warning', 'drifted-managed-files', `${operationHealth.drifted.length} managed file(s) differ from the source repo`, {
         paths: operationHealth.drifted.map(entry => entry.destinationPath)
       })
     );
@@ -811,7 +877,7 @@ function analyzeRecord(record, context) {
 
   if (operationHealth.unverified.length > 0) {
     issues.push(
-      buildIssue('warning', 'unverified-managed-operations', `${operationHealth.unverified.length} managed operation(s) could not be content-verified`, {
+      buildIssue(entrepreneurCandidate ? 'error' : 'warning', 'unverified-managed-operations', `${operationHealth.unverified.length} managed operation(s) could not be content-verified`, {
         paths: operationHealth.unverified.map(entry => entry.destinationPath).filter(Boolean)
       })
     );
@@ -866,14 +932,16 @@ function buildDoctorReport(options = {}) {
   const records = discoverInstalledStates({
     homeDir: options.homeDir,
     projectRoot: options.projectRoot,
-    targets: options.targets
-  }).filter(record => record.exists);
+    targets: options.targets,
+    profileId: options.profileId
+  }).filter(record => record.exists || record.required);
   const context = {
     repoRoot,
     homeDir: options.homeDir || process.env.HOME || os.homedir(),
     projectRoot: options.projectRoot || process.cwd(),
     manifestVersion: manifests.modulesVersion,
-    packageVersion: readPackageVersion(repoRoot)
+    packageVersion: readPackageVersion(repoRoot),
+    profileId: options.profileId || null
   };
   const results = records.map(record => analyzeRecord(record, context));
   const summary = results.reduce(
@@ -900,6 +968,10 @@ function buildDoctorReport(options = {}) {
     generatedAt: new Date().toISOString(),
     packageVersion: context.packageVersion,
     manifestVersion: context.manifestVersion,
+    legacyArtifacts: (
+      context.profileId === ENTREPRENEUR_PROFILE_ID
+      || results.some(result => result.state?.request?.profile === ENTREPRENEUR_PROFILE_ID)
+    ) ? listLegacyArtifacts(context.homeDir) : [],
     results,
     summary
   };
@@ -959,7 +1031,8 @@ function repairInstalledStates(options = {}) {
     homeDir: options.homeDir || process.env.HOME || os.homedir(),
     projectRoot: options.projectRoot || process.cwd(),
     manifestVersion: manifests.modulesVersion,
-    packageVersion: readPackageVersion(repoRoot)
+    packageVersion: readPackageVersion(repoRoot),
+    profileId: options.profileId || null
   };
   const buildOpencodeRunner = typeof options.buildOpencodePayload === 'function'
     ? options.buildOpencodePayload
@@ -967,8 +1040,9 @@ function repairInstalledStates(options = {}) {
   const records = discoverInstalledStates({
     homeDir: context.homeDir,
     projectRoot: context.projectRoot,
-    targets: options.targets
-  }).filter(record => record.exists);
+    targets: options.targets,
+    profileId: options.profileId
+  }).filter(record => record.exists || record.required);
 
   const results = records.map(record => {
     if (record.error) {
@@ -983,6 +1057,10 @@ function repairInstalledStates(options = {}) {
     }
 
     try {
+      const entrepreneurCandidate = isEntrepreneurCandidate(record, context);
+      const entrepreneurPaths = entrepreneurCandidate
+        ? assertMatchingState(record.state, context.homeDir, 'repair')
+        : null;
       const needsOpencodeBuild = record.adapter.target === 'opencode'
         && hasOpencodeBuildError(getOpencodeBuildValidationIssues(context));
       const opencodeBuildRepairPath = path.join(context.repoRoot, OPENCODE_BUILD_ARTIFACT);
@@ -1024,6 +1102,17 @@ function repairInstalledStates(options = {}) {
       const desiredPlan = createRepairPlanFromRecord(record, context);
       const operationHealth = summarizeManagedOperationHealth(context.repoRoot, desiredPlan.operations);
 
+      if (entrepreneurCandidate && (operationHealth.drifted.length > 0 || operationHealth.unverified.length > 0)) {
+        return {
+          adapter: record.adapter,
+          status: 'error',
+          installStatePath: record.installStatePath,
+          repairedPaths: [],
+          plannedRepairs: [],
+          error: 'Refusing to repair drifted or unverifiable entrepreneur-codex managed content'
+        };
+      }
+
       if (operationHealth.missingSource.length > 0) {
         return {
           adapter: record.adapter,
@@ -1054,7 +1143,11 @@ function repairInstalledStates(options = {}) {
 
       if (repairOperations.length > 0) {
         for (const operation of repairOperations) {
-          executeRepairOperation(context.repoRoot, operation, record.targetRoot);
+          executeRepairOperation(
+            context.repoRoot,
+            operation,
+            entrepreneurPaths ? entrepreneurPaths.skillsRoot : record.targetRoot
+          );
         }
         writeInstallState(desiredPlan.installStatePath, desiredPlan.statePreview);
       } else {
@@ -1126,11 +1219,18 @@ function cleanupEmptyParentDirs(filePath, stopAt) {
 }
 
 function uninstallInstalledStates(options = {}) {
+  const context = {
+    repoRoot: options.repoRoot || DEFAULT_REPO_ROOT,
+    homeDir: options.homeDir || process.env.HOME || os.homedir(),
+    projectRoot: options.projectRoot || process.cwd(),
+    profileId: options.profileId || null
+  };
   const records = discoverInstalledStates({
-    homeDir: options.homeDir,
-    projectRoot: options.projectRoot,
-    targets: options.targets
-  }).filter(record => record.exists);
+    homeDir: context.homeDir,
+    projectRoot: context.projectRoot,
+    targets: options.targets,
+    profileId: options.profileId
+  }).filter(record => record.exists || record.required);
 
   const results = records.map(record => {
     if (record.error || !record.state) {
@@ -1145,6 +1245,31 @@ function uninstallInstalledStates(options = {}) {
     }
 
     const state = record.state;
+    const entrepreneurCandidate = isEntrepreneurCandidate(record, context);
+    let entrepreneurPaths = null;
+    try {
+      if (entrepreneurCandidate) {
+        entrepreneurPaths = assertMatchingState(state, context.homeDir, 'uninstall');
+        const health = summarizeManagedOperationHealth(context.repoRoot, getManagedOperations(state));
+        if (
+          health.missing.length > 0
+          || health.drifted.length > 0
+          || health.missingSource.length > 0
+          || health.unverified.length > 0
+        ) {
+          throw new Error('Refusing to uninstall missing, drifted, or unverifiable entrepreneur-codex managed content');
+        }
+      }
+    } catch (error) {
+      return {
+        adapter: record.adapter,
+        status: 'error',
+        installStatePath: record.installStatePath,
+        removedPaths: [],
+        plannedRemovals: [],
+        error: error.message
+      };
+    }
     const plannedRemovals = Array.from(new Set([...getManagedOperations(state).map(operation => operation.destinationPath), state.target.installStatePath]));
 
     if (options.dryRun) {
@@ -1164,20 +1289,32 @@ function uninstallInstalledStates(options = {}) {
       const operations = getManagedOperations(state);
 
       for (const operation of operations) {
-        const outcome = executeUninstallOperation(operation, record.targetRoot);
+        const outcome = executeUninstallOperation(
+          operation,
+          entrepreneurPaths ? entrepreneurPaths.skillsRoot : record.targetRoot
+        );
         removedPaths.push(...outcome.removedPaths);
         cleanupTargets.push(...outcome.cleanupTargets);
       }
 
       if (fs.existsSync(state.target.installStatePath)) {
-        assertWithinTrustedRoot(state.target.installStatePath, record.targetRoot, 'uninstall');
+        if (entrepreneurPaths) {
+          if (path.resolve(state.target.installStatePath) !== entrepreneurPaths.statePath) {
+            throw new Error('Refusing to uninstall a mismatched entrepreneur-codex state path');
+          }
+        } else {
+          assertWithinTrustedRoot(state.target.installStatePath, record.targetRoot, 'uninstall');
+        }
         fs.rmSync(state.target.installStatePath, { force: true });
         removedPaths.push(state.target.installStatePath);
         cleanupTargets.push(state.target.installStatePath);
       }
 
       for (const cleanupTarget of cleanupTargets) {
-        cleanupEmptyParentDirs(cleanupTarget, state.target.root);
+        cleanupEmptyParentDirs(
+          cleanupTarget,
+          entrepreneurPaths ? entrepreneurPaths.skillsRoot : state.target.root
+        );
       }
 
       return {

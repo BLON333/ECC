@@ -6,6 +6,11 @@ const path = require('path');
 const { writeInstallState } = require('../install-state');
 const { filterMcpConfig, parseDisabledMcpServers } = require('../mcp-config');
 const { buildInstallIndex, isNamespacedSource, rewriteRelativeLinks } = require('./link-rewrite');
+const {
+  PROFILE_ID: ENTREPRENEUR_PROFILE_ID,
+  assertMatchingState,
+  assertProfilePlan,
+} = require('../entrepreneur-codex-profile');
 
 function isMarkdownPath(filePath) {
   return /\.(md|mdx|markdown)$/i.test(String(filePath || ''));
@@ -139,7 +144,82 @@ function buildResolvedClaudeHooks(plan) {
   };
 }
 
+function applyEntrepreneurCodexPlan(plan) {
+  const homeDir = path.dirname(path.dirname(plan.installStatePath));
+  const paths = assertProfilePlan(plan, homeDir);
+  assertMatchingState(plan.statePreview, homeDir, 'install');
+
+  if (fs.existsSync(paths.statePath)) {
+    throw new Error(`Install collision: install-state already exists at ${paths.statePath}`);
+  }
+  for (const skillDirectory of paths.skillDirectories) {
+    if (fs.existsSync(skillDirectory)) {
+      throw new Error(`Install collision: managed skill destination already exists at ${skillDirectory}`);
+    }
+  }
+
+  for (const operation of plan.operations) {
+    if (!operation.sourcePath || !fs.existsSync(operation.sourcePath) || !fs.statSync(operation.sourcePath).isFile()) {
+      throw new Error(`Missing source file for install: ${operation.sourcePath || operation.sourceRelativePath}`);
+    }
+  }
+
+  const createdFiles = [];
+  const createdSkillDirectories = [];
+  const candidateParentDirectories = [
+    paths.skillsRoot,
+    path.dirname(paths.skillsRoot),
+    paths.codexRoot,
+  ];
+  const newlyCreatedParentDirectories = candidateParentDirectories.filter(directory => !fs.existsSync(directory));
+  try {
+    for (const skillDirectory of paths.skillDirectories) {
+      fs.mkdirSync(path.dirname(skillDirectory), { recursive: true });
+      fs.mkdirSync(skillDirectory);
+      createdSkillDirectories.push(skillDirectory);
+    }
+    for (const operation of plan.operations) {
+      fs.mkdirSync(path.dirname(operation.destinationPath), { recursive: true });
+      fs.copyFileSync(operation.sourcePath, operation.destinationPath, fs.constants.COPYFILE_EXCL);
+      createdFiles.push(operation.destinationPath);
+    }
+    writeInstallState(paths.statePath, plan.statePreview, { exclusive: true });
+  } catch (error) {
+    for (const createdFile of createdFiles.reverse()) {
+      fs.rmSync(createdFile, { force: true });
+      let currentDirectory = path.dirname(createdFile);
+      while (currentDirectory !== paths.skillsRoot && fs.existsSync(currentDirectory)) {
+        if (fs.readdirSync(currentDirectory).length > 0) {
+          break;
+        }
+        fs.rmdirSync(currentDirectory);
+        currentDirectory = path.dirname(currentDirectory);
+      }
+    }
+    for (const skillDirectory of createdSkillDirectories.reverse()) {
+      if (fs.existsSync(skillDirectory) && fs.readdirSync(skillDirectory).length === 0) {
+        fs.rmdirSync(skillDirectory);
+      }
+    }
+    for (const directory of newlyCreatedParentDirectories) {
+      if (!fs.existsSync(directory)) {
+        continue;
+      }
+      const stat = fs.lstatSync(directory);
+      if (stat.isDirectory() && !stat.isSymbolicLink() && fs.readdirSync(directory).length === 0) {
+        fs.rmdirSync(directory);
+      }
+    }
+    throw error;
+  }
+
+  return { ...plan, applied: true };
+}
+
 function applyInstallPlan(plan) {
+  if (plan.profileId === ENTREPRENEUR_PROFILE_ID) {
+    return applyEntrepreneurCodexPlan(plan);
+  }
   const resolvedClaudeHooksPlan = buildResolvedClaudeHooks(plan);
   const disabledServers = parseDisabledMcpServers(process.env.ECC_DISABLED_MCPS);
   const linkIndex = buildLinkIndexForPlan(plan);

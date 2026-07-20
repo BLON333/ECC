@@ -109,6 +109,7 @@ const COMPONENT_ALIASES = Object.freeze({
 
 const PROFILE_ALIASES = Object.freeze({
   minimal: ['low-context', 'lean', 'no-hooks', 'base', 'lightweight'],
+  'entrepreneur-codex': ['ecc-lite', 'entrepreneur', 'intent', 'introspection', 'lightweight'],
   core: ['baseline', 'default', 'starter'],
   developer: ['app', 'code', 'coding', 'engineering', 'software'],
   security: ['appsec', 'audit', 'hardening', 'review', 'threat', 'vulnerability'],
@@ -359,7 +360,7 @@ function rankComponents({ queryTokens, target, limit }) {
 
 function rankProfiles({ queryTokens, target, limit }) {
   const manifests = loadInstallManifests();
-  return listInstallProfiles()
+  return listInstallProfiles({ target })
     .map(profile => {
       const profileDefinition = manifests.profiles[profile.id] || {};
       const aliases = PROFILE_ALIASES[profile.id] || [];

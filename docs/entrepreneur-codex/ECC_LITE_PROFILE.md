@@ -1,9 +1,9 @@
 # ECC Lite Profile Contract
 
 This document is the normative contract for ECC Lite inside Entrepreneur
-Codex. Stage 3A.2 accepts the design only. It does not implement, install, or
-activate a profile, and it grants no implementation or external-action
-authority.
+Codex. Stage 3A.2 accepted the design, and Stage 3B implements only the bounded
+repository profile and lifecycle described here. Repository implementation does
+not install or activate the profile and grants no external-action authority.
 
 ## Entrepreneur Codex and ECC Lite
 
@@ -45,7 +45,7 @@ ECC Lite is not:
 | Target | Codex only |
 | Shared-core modules | Exactly `skill-intent-driven-development` and `skill-agent-introspection-debugging` |
 | Skill bodies | The existing skills remain unchanged |
-| Installation state | Not implemented, installed, or activated by Stage 3A.2 |
+| Installation state | Implemented in the repository by Stage 3B; not installed or activated |
 
 No other skill belongs in the initial shared profile.
 
@@ -193,8 +193,9 @@ The harness may never autonomously weaken or rewrite:
 
 ## Safe install and lifecycle contract
 
-This section freezes the intended later Stage 3B lifecycle. It does not
-authorize any lifecycle operation.
+This section defines the Stage 3B lifecycle implemented in the repository. It
+does not authorize installation, activation, repair, uninstall, or any other
+lifecycle mutation in a user home.
 
 ### Destinations
 
@@ -206,8 +207,8 @@ The ECC installed-state file may remain at:
 
 > `$HOME/.codex/ecc-install-state.json`
 
-These are separate trusted roots. Stage 3B must enforce canonical containment
-for both, and no managed path may escape the approved skill root or the exact
+These are separate trusted roots. Stage 3B enforces canonical containment for
+both, and no managed path may escape the approved skill root or the exact
 installed-state location.
 
 ### Read-only operations
@@ -255,10 +256,9 @@ or deleted. Legacy migration or coexistence remains a separate future design.
 
 ### Doctor, repair, and uninstall
 
-For the future `entrepreneur-codex` Stage 3B profile, doctor must remain
-read-only and fail closed without valid matching ECC state. This is an
-intentional profile-specific Stage 3B contract; it does not claim that current
-general ECC doctor behavior already implements it.
+For the `entrepreneur-codex` Stage 3B profile, doctor remains read-only and
+fails closed without valid matching ECC state. This is an intentional
+profile-specific contract and does not redefine general ECC doctor behavior.
 
 Repair and uninstall must:
 
@@ -304,10 +304,11 @@ The following are explicitly deferred and excluded from ECC Lite:
 
 ## Stage 3B implementation boundary
 
-Stage 3B is a possible later implementation slice. It is recommended, not
-authorized or started. A separate, exact authority grant is required.
+Stage 3B was implemented under a separate, exact repository authority grant.
+That grant does not authorize installation, activation, deployment, or any
+external action.
 
-A separately authorized Stage 3B may implement only:
+The bounded Stage 3B implementation contains only:
 
 1. One Codex-only `entrepreneur-codex` profile selecting the two existing
    single-skill modules.
@@ -328,7 +329,7 @@ A separately authorized Stage 3B may implement only:
     failure.
 11. Narrow selective-install documentation.
 
-Stage 3B must exclude:
+The bounded Stage 3B implementation excludes:
 
 - skill-body changes;
 - new skills;
@@ -346,3 +347,36 @@ Stage 3B must exclude:
 - real installation;
 - profile activation; and
 - Insurance Desk or email work.
+
+## Stage 3B selective-install interface
+
+The bounded `entrepreneur-codex` implementation is present in the repository
+but is not installed or activated by that presence. It supports only the Codex
+target and exactly the two accepted synthetic single-skill modules.
+
+Inspect the plan without mutation:
+
+```bash
+node scripts/install-apply.js --target codex --profile entrepreneur-codex --dry-run
+```
+
+An explicitly authorized install uses the same command without `--dry-run` and
+writes only the two managed skill directories below `$HOME/.agents/skills` plus
+the exact state file `$HOME/.codex/ecc-install-state.json`. Existing intended
+destinations or state are collisions, including identical content. Legacy
+locations are report-only.
+
+Doctor is read-only. Repair and uninstall default to dry-run and require a
+separate `--apply` flag for mutation:
+
+```bash
+node scripts/doctor.js --profile entrepreneur-codex --target codex
+node scripts/repair.js --profile entrepreneur-codex --target codex
+node scripts/uninstall.js --profile entrepreneur-codex --target codex
+```
+
+After reviewing the dry-run output, a separately authorized mutation adds
+`--apply` to the repair or uninstall command.
+
+All three lifecycle commands fail closed when matching state cannot be proven,
+recorded paths escape their approved roots, or managed content has drifted.

@@ -173,6 +173,21 @@ function runTests() {
     assert.ok(payload.matches[0].installCommand.includes('--target codex'));
   })) passed++; else failed++;
 
+  if (test('recommends entrepreneur-codex only for the Codex target', () => {
+    const claudeResult = run(['entrepreneur', 'codex', '--json']);
+    const codexResult = run(['entrepreneur', 'codex', '--target', 'codex', '--json']);
+
+    assert.strictEqual(claudeResult.status, 0, claudeResult.stderr);
+    assert.ok(!parseJson(claudeResult.stdout).profiles.some(profile => profile.id === 'entrepreneur-codex'));
+    assert.strictEqual(codexResult.status, 0, codexResult.stderr);
+    const profile = parseJson(codexResult.stdout).profiles.find(candidate => candidate.id === 'entrepreneur-codex');
+    assert.ok(profile);
+    assert.strictEqual(
+      profile.installCommand,
+      'npx ecc install --profile entrepreneur-codex --target codex'
+    );
+  })) passed++; else failed++;
+
   if (test('rejects unknown targets', () => {
     const result = run(['security', '--target', 'not-a-target']);
 

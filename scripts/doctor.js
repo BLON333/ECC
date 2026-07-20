@@ -3,10 +3,11 @@
 const os = require('os');
 const { buildDoctorReport } = require('./lib/install-lifecycle');
 const { SUPPORTED_INSTALL_TARGETS } = require('./lib/install-manifests');
+const { getInstallTargetAdapter } = require('./lib/install-targets/registry');
 
 function showHelp(exitCode = 0) {
   console.log(`
-Usage: node scripts/doctor.js [--target <${SUPPORTED_INSTALL_TARGETS.join('|')}>] [--json]
+Usage: node scripts/doctor.js [--target <${SUPPORTED_INSTALL_TARGETS.join('|')}>] [--profile entrepreneur-codex] [--json]
 
 Diagnose drift and missing managed files for ECC install-state in the current context.
 `);
@@ -17,6 +18,7 @@ function parseArgs(argv) {
   const args = argv.slice(2);
   const parsed = {
     targets: [],
+    profileId: null,
     json: false,
     help: false,
   };
@@ -27,12 +29,30 @@ function parseArgs(argv) {
     if (arg === '--target') {
       parsed.targets.push(args[index + 1] || null);
       index += 1;
+    } else if (arg === '--profile') {
+      const profileId = args[index + 1];
+      if (!profileId || profileId.startsWith('-')) {
+        throw new Error('Missing value for --profile');
+      }
+      parsed.profileId = profileId;
+      index += 1;
     } else if (arg === '--json') {
       parsed.json = true;
     } else if (arg === '--help' || arg === '-h') {
       parsed.help = true;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
+    }
+  }
+
+  if (parsed.profileId && parsed.profileId !== 'entrepreneur-codex') {
+    throw new Error(`Unsupported lifecycle profile: ${parsed.profileId}`);
+  }
+  if (parsed.profileId) {
+    if (parsed.targets.length === 0) {
+      parsed.targets.push('codex');
+    } else if (parsed.targets.some(target => getInstallTargetAdapter(target).target !== 'codex')) {
+      throw new Error('The entrepreneur-codex lifecycle profile only supports the Codex target');
     }
   }
 
@@ -92,6 +112,7 @@ function main() {
       homeDir: process.env.HOME || os.homedir(),
       projectRoot: process.cwd(),
       targets: options.targets,
+      profileId: options.profileId,
     });
     const hasIssues = report.summary.errorCount > 0 || report.summary.warningCount > 0;
 

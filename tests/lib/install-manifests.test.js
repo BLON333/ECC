@@ -732,6 +732,29 @@ function runTests() {
             kind: 'rules',
             description: 'Core',
             paths: ['rules/core.md'],
+            targets: ['codex'],
+            dependencies: [],
+            defaultInstall: false,
+            cost: 'light',
+            stability: 'stable'
+          }
+        ],
+        profiles: {
+          bounded: { description: 'Bounded', modules: ['core'], targets: 'codex' }
+        },
+      });
+      assert.throws(
+        () => loadInstallManifests({ repoRoot }),
+        /Install profile bounded has invalid targets/
+      );
+
+      writeManifestSet(repoRoot, {
+        modules: [
+          {
+            id: 'core',
+            kind: 'rules',
+            description: 'Core',
+            paths: ['rules/core.md'],
             targets: ['claude'],
             dependencies: [],
             defaultInstall: false,

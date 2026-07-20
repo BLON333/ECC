@@ -19,6 +19,16 @@
         "workflow-quality"
       ]
     },
+    "entrepreneur-codex": {
+      "description": "Bounded Codex-only Entrepreneur profile with intent shaping and agent introspection skills.",
+      "targets": [
+        "codex"
+      ],
+      "modules": [
+        "skill-intent-driven-development",
+        "skill-agent-introspection-debugging"
+      ]
+    },
     "core": {
       "description": "Minimal harness baseline with commands, hooks, platform configs, and quality workflow support.",
       "modules": [

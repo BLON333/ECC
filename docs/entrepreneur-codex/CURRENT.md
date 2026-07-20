@@ -2,24 +2,23 @@
 
 ## Last completed slice
 
-Stage 3A.2, the last completed documentation slice, defined the
-[ECC Lite Profile Contract](ECC_LITE_PROFILE.md) as the smallest useful
-Codex-facing profile inside the larger Entrepreneur Codex harness.
+Stage 3B implemented the bounded [ECC Lite Profile Contract](ECC_LITE_PROFILE.md)
+as the smallest useful Codex-facing profile inside the larger Entrepreneur
+Codex harness.
 
 ## Active slice
 
-None authorized.
+None authorized after the bounded Stage 3B repository implementation.
 
 ## Current state
 
-Documentation only. No ECC Lite profile has been implemented, installed, or
-activated. No implementation slice is active. Stage 3A.2 did not create a
-runtime, connector, MCP, agent, hook, external-system access, or private-data
-change. No skill was installed or activated, and Stage 3B was not started.
+The Codex-only `entrepreneur-codex` profile is implemented in the repository
+with exactly two unchanged skills and fail-closed lifecycle handling. It has
+not been installed or activated. Stage 3B did not create a runtime, connector,
+MCP, agent, hook, external-system access, or private-data change.
 
 ## Recommended next slice
 
-Stage 3B: implement only the bounded
-[Stage 3B implementation boundary](ECC_LITE_PROFILE.md#stage-3b-implementation-boundary).
-
-Stage 3B is recommended only. It is not authorized or started.
+No next ECC repository implementation slice is authorized. Any future pilot,
+installation, or activation evaluation is a separate operator decision and is
+not authorized here.

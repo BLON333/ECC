@@ -120,6 +120,32 @@ function runTests() {
     }
   })) passed++; else failed++;
 
+  if (test('exclusive state creation preserves an existing state file', () => {
+    const testDir = createTestDir();
+    const statePath = path.join(testDir, 'ecc-install-state.json');
+
+    try {
+      const state = createInstallState({
+        adapter: { id: 'codex-home', target: 'codex', kind: 'home' },
+        targetRoot: path.join(testDir, '.codex'),
+        installStatePath: statePath,
+        request: { profile: 'entrepreneur-codex', modules: [], legacyLanguages: [], legacyMode: false },
+        resolution: { selectedModules: ['skill-intent-driven-development'], skippedModules: [] },
+        operations: [],
+        source: { repoVersion: CURRENT_PACKAGE_VERSION, repoCommit: 'abc123', manifestVersion: 1 },
+      });
+      fs.writeFileSync(statePath, 'existing-state');
+
+      assert.throws(
+        () => writeInstallState(statePath, state, { exclusive: true }),
+        /exist|EEXIST/i,
+      );
+      assert.strictEqual(fs.readFileSync(statePath, 'utf8'), 'existing-state');
+    } finally {
+      cleanupTestDir(testDir);
+    }
+  })) passed++; else failed++;
+
   if (test('deep-clones nested operation metadata for lifecycle-managed operations', () => {
     const operation = {
       kind: 'merge-json',

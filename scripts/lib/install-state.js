@@ -285,10 +285,22 @@ function readInstallState(filePath) {
   return state;
 }
 
-function writeInstallState(filePath, state) {
+function writeInstallState(filePath, state, options = {}) {
   assertValidInstallState(state, filePath);
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, `${JSON.stringify(state, null, 2)}\n`);
+  const serialized = `${JSON.stringify(state, null, 2)}\n`;
+  if (!options.exclusive) {
+    fs.writeFileSync(filePath, serialized);
+    return state;
+  }
+
+  const temporaryPath = `${filePath}.tmp-${process.pid}-${Date.now()}`;
+  try {
+    fs.writeFileSync(temporaryPath, serialized, { flag: 'wx' });
+    fs.linkSync(temporaryPath, filePath);
+  } finally {
+    fs.rmSync(temporaryPath, { force: true });
+  }
   return state;
 }
 

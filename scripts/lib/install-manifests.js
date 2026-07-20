@@ -249,6 +249,35 @@ function readModuleTargetsOrThrow(module) {
   return normalizedTargets;
 }
 
+function readProfileTargetsOrThrow(profile, profileId) {
+  if (!profile || typeof profile !== 'object' || Array.isArray(profile)) {
+    throw new Error(`Install profile ${profileId} is invalid; expected an object`);
+  }
+  if (!Object.hasOwn(profile, 'targets')) {
+    return null;
+  }
+  if (!Array.isArray(profile.targets) || profile.targets.length === 0) {
+    throw new Error(`Install profile ${profileId} has invalid targets; expected a non-empty array`);
+  }
+
+  const normalizedTargets = profile.targets.map(target => (
+    typeof target === 'string' ? target.trim() : ''
+  ));
+  if (
+    normalizedTargets.some(target => target.length === 0)
+    || new Set(normalizedTargets).size !== normalizedTargets.length
+  ) {
+    throw new Error(`Install profile ${profileId} has invalid targets; expected unique supported target ids`);
+  }
+  const unsupportedTargets = normalizedTargets.filter(target => !SUPPORTED_INSTALL_TARGETS.includes(target));
+  if (unsupportedTargets.length > 0) {
+    throw new Error(
+      `Install profile ${profileId} has unsupported targets: ${unsupportedTargets.join(', ')}`
+    );
+  }
+  return normalizedTargets;
+}
+
 function assertKnownModuleIds(moduleIds, manifests) {
   const unknownModuleIds = dedupeStrings(moduleIds)
     .filter(moduleId => !manifests.modulesById.has(moduleId));
@@ -304,6 +333,9 @@ function loadInstallManifests(options = {}) {
   for (const module of modules) {
     readModuleTargetsOrThrow(module);
   }
+  for (const [profileId, profile] of Object.entries(profiles)) {
+    readProfileTargetsOrThrow(profile, profileId);
+  }
 
   const modulesById = new Map(modules.map(module => [module.id, module]));
   const componentsById = new Map(components.map(component => [component.id, component]));
@@ -326,11 +358,21 @@ function loadInstallManifests(options = {}) {
 
 function listInstallProfiles(options = {}) {
   const manifests = loadInstallManifests(options);
-  return Object.entries(manifests.profiles).map(([id, profile]) => ({
-    id,
-    description: profile.description,
-    moduleCount: Array.isArray(profile.modules) ? profile.modules.length : 0,
-  }));
+  const target = options.target || null;
+  if (target && !SUPPORTED_INSTALL_TARGETS.includes(target)) {
+    throw new Error(
+      `Unknown install target: ${target}. Expected one of ${SUPPORTED_INSTALL_TARGETS.join(', ')}`
+    );
+  }
+
+  return Object.entries(manifests.profiles)
+    .map(([id, profile]) => ({
+      id,
+      description: profile.description,
+      moduleCount: Array.isArray(profile.modules) ? profile.modules.length : 0,
+      targets: readProfileTargetsOrThrow(profile, id) || SUPPORTED_INSTALL_TARGETS.slice(),
+    }))
+    .filter(profile => !target || profile.targets.includes(target));
 }
 
 function listInstallModules(options = {}) {
@@ -549,6 +591,12 @@ function resolveInstallPlan(options = {}) {
     if (!profile) {
       throw new Error(`Unknown install profile: ${profileId}`);
     }
+    const profileTargets = readProfileTargetsOrThrow(profile, profileId);
+    if (profileTargets && (!target || !profileTargets.includes(target))) {
+      throw new Error(
+        `Install profile ${profileId} only supports target(s): ${profileTargets.join(', ')}`
+      );
+    }
     requestedModuleIds.push(...profile.modules);
   }
 
@@ -679,6 +727,7 @@ function resolveInstallPlan(options = {}) {
       repoRoot: targetPlanningInput.repoRoot,
       projectRoot: targetPlanningInput.projectRoot,
       homeDir: targetPlanningInput.homeDir,
+      profileId,
       modules: selectedModules,
       exemptValidationCodes: options.exemptValidationCodes || [],
     })

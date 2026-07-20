@@ -160,6 +160,10 @@ function validateInstallManifests() {
         continue;
       }
 
+      // The runtime loader exposes every curated skill as a synthetic
+      // single-skill module. Profile validation must recognize the same IDs.
+      moduleIds.add(`skill-${entry.name}`);
+
       if (
         !INTENTIONALLY_UNSHIPPED_SKILL_IDS.has(entry.name)
         && !isCuratedSkillReferenced(claimedPaths, entry.name)
