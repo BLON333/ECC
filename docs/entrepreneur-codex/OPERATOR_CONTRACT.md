@@ -23,7 +23,7 @@ Automatic permission to prepare repository changes remains subject to the [Codex
 - Production deployment
 - Real customer-data use, subject to the separate approval gate in the [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md)
 - Email sending
-- Applied EPIC writes
+- Writes to [Applied EPIC](INSURANCE_KNOWLEDGE_ARCHITECTURE.md#authority), the insurance agency management system used as the official account and activity record
 - Authentication or authorization changes
 - Secrets
 - Paid spending
