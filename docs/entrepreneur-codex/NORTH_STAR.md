@@ -7,7 +7,7 @@ The workspace supports two lanes:
 - **Software Studio** builds separate software products for users and customers.
 - **Internal Automation** improves Jason's own personal and work processes, beginning with private commercial-insurance assistance.
 
-The lanes may share a simple ECC-based operating foundation, but products and automation software remain in separate repositories. Their code, credentials, and runtime permissions also remain separate. Live insurance working data belongs only in a future separately approved Insurance Desk workspace, never in a software repository or worktree.
+The lanes may share a simple ECC-based operating foundation, but products and automation software remain in separate repositories. Their code, credentials, and runtime permissions also remain separate. Local live insurance working data belongs in the operator-designated private Insurance Desk workspace at `C:\Insurance Desk\Insurance Desk`, outside Git; it never belongs in a software repository or worktree.
 
 The system grows one understandable, testable slice at a time. Committed repository work follows the [Codex Project and Session Topology](PROJECT_SESSION_TOPOLOGY.md), the normative source for Project, thread, active-writer, and worktree mechanics.
 
