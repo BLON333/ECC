@@ -1,23 +1,23 @@
-# Current Slice
+# Current State
 
-## Current slice
+## Last completed slice
 
-Document the three operating contracts required before the lightweight Entrepreneur ECC profile is designed:
+The last completed slice documented three operating contracts required before the lightweight Entrepreneur ECC profile:
 
 - Codex Project and session topology;
 - tool and connection maintenance; and
 - insurance knowledge architecture.
 
-## Acceptance criteria
+## Active slice
 
-- Projects, threads, worktrees, skills, connections, and private knowledge have clear roles.
-- Insurance Ops — Build and Insurance Desk — Operate remain separate.
-- Every connection has a permission, health, maintenance, failure, and revocation contract.
-- Account memory and organization process knowledge have clear structures and authority.
-- Applied EPIC remains the official account and activity record.
-- No runtime, connector, profile, private store, directory, or database is created.
-- The next slice is clearly recommended but not started.
+None authorized.
+
+## Current state
+
+Documentation only. No Entrepreneur ECC profile, runtime, connector, Insurance Desk workspace, private store, directory, or database has been created or configured by the operating-contract slice.
 
 ## Recommended next slice
 
 Design the lightweight Entrepreneur ECC profile as a bounded documentation and configuration contract.
+
+This is a recommendation only; it is not authorized or started.

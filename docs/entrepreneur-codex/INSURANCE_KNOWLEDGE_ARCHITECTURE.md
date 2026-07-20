@@ -1,16 +1,28 @@
 # Insurance Knowledge Architecture
 
-This contract defines a future private knowledge layer for assist-only insurance work. No directory, database, connector, or ingestion runtime is created by this slice.
+This contract defines a proposed future Insurance Desk workspace for assist-only insurance work. It separates live working data from the private insurance-assistance software repository. No directory, database, connector, or ingestion runtime is created or configured by this slice.
+
+## Status and location
+
+The workspace root must be configurable through `INSURANCE_DESK_HOME`.
+
+- Provisional local default: `C:\InsuranceDesk`
+- Final location: subject to organization-approved storage and AI handling
+
+The default and structure below are a proposed starting direction, not an accepted final storage decision. This slice does not create `C:\InsuranceDesk`, set `INSURANCE_DESK_HOME`, or modify `C:\DevV2\_private-data`.
 
 ## Authority
 
 | Source | Authority |
 |---|---|
 | Applied EPIC | Official account and activity record. The operator performs and confirms every live action there. |
-| Private insurance memory | AI-readable operational history and evidence index. It supports retrieval and drafting but does not replace Applied EPIC. |
-| Source documents and messages | Evidence inputs whose identity, date, and provenance must be retained. |
+| Outlook and original documents | Communication and documentary evidence whose identity, date, and provenance must be retained. |
+| Obsidian Vault | Curated operational memory for retrieval, drafting, and review. It does not replace Applied EPIC or original source evidence. |
+| Generated state | Optional derived indexes for retrieval. Generated state is rebuildable and is never an editable source of authority. |
 | Conversations | Temporary working context, not durable account memory or process approval. |
 | GitHub | Authority for software and repository documentation only; it never stores private client material. |
+
+Every material fact must retain its source reference, observed or confirmed date, and verification status. Verified facts must remain distinguishable from AI interpretation and recommendations. Memory updates are proposed for operator review rather than silently accepted.
 
 ## A. Account and client memory
 
@@ -29,7 +41,7 @@ Memory is anchored to the business account, not an email thread. Each account re
 - current strategy; and
 - evidence references.
 
-Every material fact should retain its source reference, observed or confirmed date, and verification status. A new task thread retrieves the relevant account brief and evidence; it does not depend on finding an old conversation.
+A new task thread retrieves the relevant account brief and evidence; it does not depend on finding an old conversation.
 
 ## B. Organization process knowledge
 
@@ -44,31 +56,35 @@ Process knowledge records how the organization has decided work should be perfor
 
 Only **Approved** process knowledge may drive a workflow. Each process should record its owner, reviewer, effective date, evidence, version, and any process it supersedes.
 
-## Proposed future private structure
+## Proposed Insurance Desk structure
 
 ```text
-C:\DevV2\_private-data\insurance-ops\
-├── sources\
-│   └── accounts\
-├── knowledge\
-│   ├── accounts.db
-│   ├── account-briefs\
-│   └── processes\
-├── drafts\
-└── archive\
+C:\InsuranceDesk\
+├── Vault\
+│   ├── Accounts\
+│   ├── Events\
+│   ├── Processes\
+│   ├── Work Queue\
+│   ├── Drafts\
+│   └── Templates\
+├── Sources\
+│   └── Accounts\
+├── State\
+│   └── index.sqlite
+├── Exports\
+└── Archive\
 ```
 
-This is a proposed layout. This slice does not create or modify any directory or database, including any private path that already exists. None of it enters Git. SQLite plus structured files and ordinary search is enough initially; no vector database is required.
+- `Vault/` is an Obsidian-first, human-readable working-memory cockpit. Its account notes, events, processes, work queue, drafts, and templates remain curated views linked to evidence rather than an official system of record.
+- `Sources/` holds original evidence outside the vault, organized by account and retaining source provenance.
+- `State/index.sqlite` is optional, generated, and rebuildable later. It is not the initial editable authority, and its absence does not block the human-readable workspace.
+- `Exports/` holds operator-approved work packages prepared for an authorized downstream action.
+- `Archive/` retains superseded or closed material only under an approved retention process.
 
-- `sources/accounts/` retains ingested evidence with provenance.
-- `knowledge/accounts.db` holds structured account facts and indexes.
-- `knowledge/account-briefs/` holds readable derived summaries linked to evidence.
-- `knowledge/processes/` holds versioned organization processes and their approval state.
-- `drafts/` holds generated work awaiting human review.
-- `archive/` retains superseded or closed material according to an approved retention process.
+## Future ingestion and connections
 
-## Initial ingestion and future connections
+No real client data may be used until storage, backup, retention, device security, and AI-processing arrangements are separately approved. Any earlier pilot uses synthetic or sanitized material only.
 
-The first ingestion routes are exported emails, pasted messages, uploaded documents, and manually confirmed outcomes. Ingestion must preserve the business-account anchor, source provenance, received or confirmed date, and any verification uncertainty.
+If real-data ingestion is later approved, possible routes include exported emails, pasted messages, uploaded documents, and manually confirmed outcomes. Ingestion must preserve the business-account anchor, source provenance, received or confirmed date, and any verification uncertainty.
 
-Future permitted connectors must preserve this architecture: evidence lands as a source, structured memory points back to it, only Approved processes drive workflows, and Applied EPIC remains the official account and activity record. A connector may reduce manual transport; it may not silently change authority or approval.
+Future permitted connectors must preserve this architecture: evidence lands as a source, curated memory points back to it, only Approved processes drive workflows, and Applied EPIC remains the official account and activity record. A connector may reduce manual transport; it may not silently change authority, verification status, or approval.

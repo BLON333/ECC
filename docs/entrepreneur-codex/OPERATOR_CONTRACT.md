@@ -9,17 +9,19 @@ These permissions apply only to authorized local files and repository material. 
 - Reading
 - Explaining
 - Planning
-- Local branch and worktree creation
+- Local branch creation
 - Coding inside an authorized slice
 - Tests
 - Documentation
 - Draft pull-request preparation
 
+Any authorized task that will commit code, tests, configuration, scripts, skills, or documentation uses a Codex-managed worktree by default. Read-only planning, orientation, and review use the canonical Project without requiring a worktree.
+
 ## Operator approval required
 
 - Merge
 - Production deployment
-- Real customer-data use
+- Real customer-data use, after storage, backup, retention, device security, and AI-processing arrangements are separately approved
 - Email sending
 - Applied EPIC writes
 - Authentication or authorization changes
