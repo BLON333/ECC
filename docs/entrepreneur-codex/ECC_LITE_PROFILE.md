@@ -217,8 +217,8 @@ The following operations remain read-only:
 
 ### New-install collision policy
 
-A clean new install requires both intended skill destinations and the ECC
-installed-state file to be absent.
+A pristine first install requires both intended skill destinations to be absent,
+and the ECC installed-state file to be absent.
 
 A new installation must fail closed when:
 
