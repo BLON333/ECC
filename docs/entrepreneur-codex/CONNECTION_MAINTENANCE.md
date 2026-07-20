@@ -56,11 +56,13 @@ Registry entries do not authorize a connector, cloud synchronization, mailbox au
 | Supabase/Vercel | Not required | None until a separately approved need exists | Not applicable | Not applicable | Use local storage and local builds | No connection to revoke |
 | Stripe/Resend | Not required | None until a separately approved need exists | Not applicable | Not applicable | Keep billing and email delivery out of scope | No connection to revoke |
 
-## Accepted future work-email direction
+## Proposed future work-email architecture
 
-Future work-email automation should keep Microsoft 365 as the mailbox-monitoring and mailbox-action plane and the private Insurance Desk as the account-memory, process, reasoning, and drafting plane. The planes may communicate only through an explicitly approved, provenance-preserving structured work-packet bridge. Initial transport remains manual.
+Future work-email automation is expected to keep Microsoft 365 as the mailbox-monitoring and mailbox-action plane and the private Insurance Desk as the account-memory, organization-process, reasoning, and drafting plane. The planes may later communicate through an explicitly approved, provenance-preserving structured work queue or file bridge. Initial transport remains manual.
 
-This direction does not activate a connection or authorize mailbox access, cloud synchronization, flags, categories, drafts, sends, or another external action. Detailed queue, transport, permissions, storage, synchronization, and connector design remains a later private Insurance Ops task.
+Work IQ remains a possible future direct connection but is currently blocked by Microsoft Entra tenant administration. Any service-principal provisioning or administrative consent is consequential and separately gated, so Work IQ remains parked and must not block the current system. Power Automate, Microsoft List or SharePoint, OneDrive for Business, and Copilot Studio remain candidate components pending a separate user-permission, tenant-policy, data-boundary, and reliability assessment.
+
+This proposed architecture does not activate a connection or authorize mailbox access, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, or another external action. Detailed queue, transport, permissions, storage, synchronization, attachment, and connector design remains a later private Insurance Ops task.
 
 ## Maintenance rhythm
 

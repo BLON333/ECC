@@ -2,7 +2,7 @@
 
 ## Last completed slice
 
-Stage 2.1, the last completed documentation slice, reconciled the Entrepreneur Codex contracts with the operator-designated active private Insurance Desk at `C:\Insurance Desk\Insurance Desk`. It recorded the account-centred knowledge model, temporary Raw Data ingestion lifecycle, local assist-only real-data boundary, pending local configuration work, and accepted future two-plane work-email direction without inspecting or modifying the private workspace.
+Stage 2.1, the last completed documentation slice, reconciled the Entrepreneur Codex contracts with the operator-designated active private Insurance Desk at `C:\Insurance Desk\Insurance Desk`. It recorded the account-centred knowledge model, temporary Raw Data ingestion lifecycle, local assist-only real-data boundary, pending local configuration work, proposed future two-plane work-email architecture, and parked tenant-blocked Work IQ route without inspecting or modifying the private workspace.
 
 ## Active slice
 

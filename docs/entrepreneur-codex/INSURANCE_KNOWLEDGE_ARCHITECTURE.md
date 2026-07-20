@@ -139,16 +139,18 @@ The following remain prohibited without separate exact authority:
 
 Applied EPIC remains the official account and activity record. Outlook and original documents remain communication and documentary evidence. The Insurance Desk remains curated operating memory and a drafting surface, not a replacement for those sources.
 
-## Accepted future work-email direction
+## Proposed future work-email architecture
 
-Future work-email automation should use a two-plane architecture:
+Future work-email automation is expected to use a two-plane architecture:
 
 - Microsoft 365 is the mailbox-monitoring and mailbox-action plane.
-- The private Insurance Desk is the account-memory, process, reasoning, and drafting plane.
-- The planes communicate only through an explicitly approved, provenance-preserving structured work-packet bridge.
+- The private Insurance Desk is the account-memory, organization-process, reasoning, and drafting plane.
+- The planes may later communicate through an explicitly approved, provenance-preserving structured work queue or file bridge.
+- Work IQ remains a possible future direct connection, but it is currently blocked by Microsoft Entra tenant administration and must not block the current system.
+- Power Automate, Microsoft List or SharePoint, OneDrive for Business, and Copilot Studio remain candidate Microsoft-side components pending separate user-permission, tenant-policy, data-boundary, and reliability assessment.
 - Initial transport remains manual.
 
-This accepted target direction constrains later design but does not authorize mailbox access, a connector, cloud synchronization, flags, categories, drafts, sends, or any external action. Detailed queue, transport, permissions, storage, synchronization, and connector design belongs to a later private Insurance Ops slice using synthetic fixtures for software development.
+This proposed architecture does not authorize mailbox access, a connector, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, or any external action. Detailed queue, transport, permissions, storage, synchronization, attachment, and connector design belongs to a later private Insurance Ops slice using synthetic fixtures for software development.
 
 ## Deferred generated retrieval state
 
