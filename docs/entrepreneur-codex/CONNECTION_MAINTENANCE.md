@@ -16,9 +16,7 @@ Every connection record must state:
 - where it is used and the data it may access;
 - read and write permissions;
 - credential source, without copying the credential;
-- required or optional state;
-- health-check method and update method;
-- last verified date;
+- health check method and update method;
 - failure and fallback procedure; and
 - revocation procedure.
 
