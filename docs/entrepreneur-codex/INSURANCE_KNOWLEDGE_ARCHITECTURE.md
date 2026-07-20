@@ -56,6 +56,30 @@ Process knowledge records how the organization has decided work should be perfor
 
 Only **Approved** process knowledge may drive a workflow. Each process should record its owner, reviewer, effective date, evidence, version, and any process it supersedes.
 
+## Synthetic and sanitized fixture standard
+
+Synthetic fixtures are the default for the first insurance pilot. They are invented from scratch, are not derived by lightly editing a real client file, and contain no real client, prospect, employee, insurer, underwriter, account, policy, claim, quote, submission, location, project, credential, or communication data.
+
+A source-derived fixture may be called sanitized only after a documented human review. Merely replacing the client name is not sufficient. Sanitization must remove or fictionalize:
+
+- names;
+- email addresses;
+- phone numbers;
+- mailing and risk addresses;
+- account, policy, quote, claim, submission, activity, and application numbers;
+- exact identifiers and credentials;
+- hidden document metadata;
+- filenames containing client information;
+- unique locations, operations, project descriptions, dates, amounts, or combinations of facts that could reasonably identify the source account;
+- embedded comments, tracked changes, attachments, and document properties; and
+- any re-identification key or crosswalk.
+
+The reviewer must confirm that the fixture cannot reasonably be traced back to the source account using the fixture alone or ordinary public or contextual information. No source-derived sanitized fixture may enter Git until that review is completed and recorded without including the original client content.
+
+Each fixture record must state whether the fixture is synthetic or sanitized, its preparer and preparation date, its human reviewer and review date when sanitized, its review disposition, and its source category when source-derived. The record must not include original client content, a re-identification key, or a crosswalk.
+
+When there is doubt, use a fully synthetic fixture instead. No real or source-derived fixture is created, copied, opened, or added during this PR.
+
 ## Proposed Insurance Desk structure
 
 ```text
@@ -83,7 +107,7 @@ C:\InsuranceDesk\
 
 ## Future ingestion and connections
 
-No real client data may be used until storage, backup, retention, device security, and AI-processing arrangements are separately approved. Any earlier pilot uses synthetic or sanitized material only.
+No real client data may be used until storage, backup, retention, device security, AI-processing arrangements, permissions, and operating controls are separately approved. Any earlier pilot uses only fixtures that meet the synthetic and sanitized fixture standard above.
 
 If real-data ingestion is later approved, possible routes include exported emails, pasted messages, uploaded documents, and manually confirmed outcomes. Ingestion must preserve the business-account anchor, source provenance, received or confirmed date, and any verification uncertainty.
 

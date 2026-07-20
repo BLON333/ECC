@@ -10,4 +10,4 @@ This sequence is planning context, not authorization to begin a slice.
 6. Approved real-data connections and operating controls
 7. Evidence-based expansion or consolidation
 
-Stage 4 uses no real client data. Real-data connections and their storage, backup, retention, device security, AI-processing, permission, and operating controls remain a later gate requiring separate approval.
+Stage 4 uses only fixtures that meet the [synthetic and sanitized fixture standard](INSURANCE_KNOWLEDGE_ARCHITECTURE.md#synthetic-and-sanitized-fixture-standard). Approved real-data connections and operating controls remain the later Stage 6 gate; roadmap placement does not authorize them.

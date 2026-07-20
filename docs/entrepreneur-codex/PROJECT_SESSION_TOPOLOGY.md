@@ -2,6 +2,21 @@
 
 This contract defines where work belongs before the lightweight Entrepreneur ECC profile is designed. It organizes existing Codex and ECC concepts; it does not add a runtime. Canonical repository folders are the durable Codex Projects. Worktrees are temporary execution spaces attached to those Projects.
 
+## Document responsibilities
+
+Each contract has one normative responsibility. Summaries and cross-references do not create a second source of policy; if wording conflicts, the document assigned below controls its subject.
+
+| Document | Normative responsibility |
+|---|---|
+| [North Star](NORTH_STAR.md) | Purpose, outcomes, and enduring principles only. |
+| [Roadmap](ROADMAP.md) | Planned sequence only; it never authorizes a slice. |
+| [Current State](CURRENT.md) | Last completed slice, active authorization, current state, and the recommended next slice only. |
+| [Decisions](DECISIONS.md) | Accepted decisions and clearly separated proposed directions; it records decisions rather than full operating procedures. |
+| [Operator Contract](OPERATOR_CONTRACT.md) | Authority, approvals, consequential actions, and fail-closed behavior. |
+| Codex Project and Session Topology (this document) | Codex Projects, threads, canonical repositories, Codex-managed worktrees, exceptional manual worktrees, active-writer rules, and post-merge cleanup. |
+| [Tool and Connection Maintenance Contract](CONNECTION_MAINTENANCE.md) | Connectors, permissions, health checks, maintenance, fallback, and revocation. |
+| [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md) | Insurance Desk memory, evidence, authority, organization-process states, data boundaries, and fixture rules. |
+
 ## Working units
 
 | Unit | Plain-English meaning |
@@ -37,14 +52,10 @@ Insurance Desk — Operate is a future approved private operating workspace. It 
 - Any authorized task that will commit code, tests, configuration, scripts, skills, or documentation uses a Codex-managed worktree by default. Read-only planning, orientation, and review use the canonical Project without requiring a worktree.
 - `C:\DevV2\_worktrees` is not a Codex Project. Manually managed worktrees under that folder are exceptional recovery, fixed-path, specialist-tool, or deliberately long-lived lanes.
 - Completed worktrees are removed only after merge and verification.
-- Do not use one permanent client thread as account memory.
-- Start a fresh task thread for a new outcome and retrieve the durable account history and Approved processes it needs.
 - Record durable repository decisions in repository documentation. Repository memory is more authoritative than old chats.
-- Treat conversations as working context. A conversation does not approve a process, change a system of record, or grant a connector permission.
 
-## Authority boundaries
+## Related authority contracts
 
-- GitHub is authoritative for repository code, branches, issues, pull requests, checks, and merges.
-- Applied EPIC is authoritative for live insurance account and activity records.
-- The proposed Insurance Desk Vault is curated operational memory; it does not replace Applied EPIC, Outlook, or original evidence, and generated state has no independent authority.
-- Approved repository instructions and Approved organization processes govern workflows. Old conversations do not.
+- Authority, approvals, consequential actions, and fail-closed behavior are defined in the [Operator Contract](OPERATOR_CONTRACT.md).
+- Connector permissions, health checks, maintenance, fallback, and revocation are defined in the [Tool and Connection Maintenance Contract](CONNECTION_MAINTENANCE.md).
+- Insurance record, evidence, memory, process-state, and data-boundary authority are defined in the [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md).
