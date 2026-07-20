@@ -2,7 +2,9 @@
 
 ## Last completed slice
 
-Stage 2.1, the last completed documentation slice, reconciled the Entrepreneur Codex contracts with the operator-designated active private Insurance Desk at `C:\Insurance Desk\Insurance Desk`. It recorded the account-centred knowledge model, temporary Raw Data ingestion lifecycle, local assist-only real-data boundary, pending local configuration work, proposed future two-plane work-email architecture, and parked tenant-blocked Work IQ route without inspecting or modifying the private workspace.
+Stage 3A.2, the last completed documentation slice, defined the
+[ECC Lite Profile Contract](ECC_LITE_PROFILE.md) as the smallest useful
+Codex-facing profile inside the larger Entrepreneur Codex harness.
 
 ## Active slice
 
@@ -10,10 +12,14 @@ None authorized.
 
 ## Current state
 
-Documentation only. The private Insurance Desk exists independently of this repository; this correction did not inspect, create, move, copy, reorganize, or configure it. No Entrepreneur ECC profile, runtime, connector, cloud synchronization, mailbox automation, private store, directory, or database has been created or configured by this slice.
+Documentation only. No ECC Lite profile has been implemented, installed, or
+activated. No implementation slice is active. Stage 3A.2 did not create a
+runtime, connector, MCP, agent, hook, external-system access, or private-data
+change. No skill was installed or activated, and Stage 3B was not started.
 
 ## Recommended next slice
 
-Stage 3A.2: design the lightweight Entrepreneur ECC profile as a bounded documentation and configuration contract.
+Stage 3B: implement only the bounded
+[Stage 3B implementation boundary](ECC_LITE_PROFILE.md#stage-3b-implementation-boundary).
 
-This is a recommendation only; it is not authorized or started.
+Stage 3B is recommended only. It is not authorized or started.
