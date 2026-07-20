@@ -56,6 +56,11 @@ No other skill belongs in the initial shared profile.
 | `skill-intent-driven-development` | `intent-driven-development` |
 | `skill-agent-introspection-debugging` | `agent-introspection-debugging` |
 
+These two `skill-*` names are loader-generated synthetic single-skill module
+IDs. Each points to the existing unchanged skill shown beside it; neither is a
+new module, a new skill, or a skill-body change. The profile remains exactly
+these two existing skills.
+
 `intent-driven-development`:
 
 - helps turn ambiguous or consequential work into bounded, observable scope
@@ -250,7 +255,10 @@ or deleted. Legacy migration or coexistence remains a separate future design.
 
 ### Doctor, repair, and uninstall
 
-Doctor must remain read-only and fail closed without valid matching ECC state.
+For the future `entrepreneur-codex` Stage 3B profile, doctor must remain
+read-only and fail closed without valid matching ECC state. This is an
+intentional profile-specific Stage 3B contract; it does not claim that current
+general ECC doctor behavior already implements it.
 
 Repair and uninstall must:
 
