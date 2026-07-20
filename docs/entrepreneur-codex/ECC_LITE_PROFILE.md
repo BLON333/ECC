@@ -228,9 +228,9 @@ A new installation must fail closed when:
 - state is missing, malformed, or inconsistent while prior or partial
   ECC-managed artifacts exist.
 
-Missing state by itself is not a pristine-install collision when both intended
-destinations are absent and no prior or partial ECC-managed artifacts exist.
-Missing, malformed, or inconsistent state must fail closed when prior or
+Missing state by itself is not a pristine first-install collision when both
+intended destinations are absent and no prior or partial ECC-managed artifacts
+exist. Missing, malformed, or inconsistent state must fail closed when prior or
 partial ECC-managed artifacts exist.
 
 Identical existing content must not be silently adopted.
