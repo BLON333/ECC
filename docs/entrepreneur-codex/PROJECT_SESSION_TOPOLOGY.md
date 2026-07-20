@@ -1,6 +1,10 @@
 # Codex Project and Session Topology
 
-This contract defines where work belongs before the lightweight Entrepreneur ECC profile is designed. It organizes existing Codex and ECC concepts; it does not add a runtime. Canonical repository folders are the durable Codex Projects. Worktrees are temporary execution spaces attached to those Projects.
+This contract defines where work belongs alongside the lightweight
+[Entrepreneur ECC profile](ECC_LITE_PROFILE.md). It organizes existing Codex
+and ECC concepts; it does not add a runtime. Canonical repository folders are
+the durable Codex Projects. Worktrees are temporary execution spaces attached
+to those Projects.
 
 ## Document responsibilities
 
@@ -16,6 +20,7 @@ Each contract has one normative responsibility. Summaries and cross-references d
 | Codex Project and Session Topology (this document) | Codex Projects, threads, canonical repositories, Codex-managed worktrees, exceptional manual worktrees, active-writer rules, and post-merge cleanup. |
 | [Tool and Connection Maintenance Contract](CONNECTION_MAINTENANCE.md) | Connectors, permissions, health checks, maintenance, fallback, and revocation. |
 | [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md) | Insurance Desk memory, evidence, authority, organization-process states, data boundaries, and fixture rules. |
+| [ECC Lite Profile Contract](ECC_LITE_PROFILE.md) | Full-harness versus ECC Lite distinction, profile and non-goals, seven-phase operator model, safe lifecycle, minimal evidence, human-governed improvement, deferred capabilities, and Stage 3B boundary. |
 
 ## Working units
 
@@ -59,3 +64,4 @@ These are the intended Project boundaries. Naming a Project here does not create
 - Authority, approvals, consequential actions, and fail-closed behavior are defined in the [Operator Contract](OPERATOR_CONTRACT.md).
 - Connector permissions, health checks, maintenance, fallback, and revocation are defined in the [Tool and Connection Maintenance Contract](CONNECTION_MAINTENANCE.md).
 - Insurance record, evidence, memory, process-state, and data-boundary authority are defined in the [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md).
+- ECC Lite profile scope, lifecycle safety, evidence, improvement, exclusions, and the Stage 3B boundary are defined in the [ECC Lite Profile Contract](ECC_LITE_PROFILE.md).

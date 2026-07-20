@@ -6,7 +6,20 @@ A usable tool connection is more than an installed package:
 
 A connection may be a local instruction surface, CLI, private workspace, MCP server, or external application. Use ECC's native capability rule: prefer instructions, a skill, or a local CLI when they are enough; use MCP only when a long-lived structured connection is worth its cost.
 
-A future Entrepreneur profile should declare capabilities through ECC's native selective-install modules and profiles, then preview the resolved install plan before mutation. This slice creates no profile, manifest, or install plan.
+The [ECC Lite Profile Contract](ECC_LITE_PROFILE.md) defines only a future
+Codex skill profile. Stage 3A.2 creates no profile, manifest, install plan, or
+connection.
+
+## ECC Lite connection boundary
+
+- ECC Lite installs no connector or MCP.
+- ECC Lite grants no external-system access.
+- Profile installation does not change connection authority.
+- Later connections remain separately selected, health-checked, and authorized
+  under this contract and the [Operator Contract](OPERATOR_CONTRACT.md).
+
+The connection registry below is part of the larger Entrepreneur Codex
+harness, not content installed by ECC Lite.
 
 ## Required record
 

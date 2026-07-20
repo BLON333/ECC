@@ -3,7 +3,7 @@
 These decisions define the initial Entrepreneur Codex foundation:
 
 - Codex Desktop and Codex CLI are the primary working surfaces.
-- ECC is the shared lightweight capability layer.
+- ECC Lite is the small ECC-managed capability profile inside Entrepreneur Codex; it is not the larger harness.
 - The fresh workspace root is `C:\DevV2`.
 - Builder, `_desktop-coding-stack`, and Hermes are excluded from this setup.
 - Software Studio and Internal Automation share a foundation but remain separate lanes, with separate repositories, data, credentials, and runtime permissions.
@@ -27,6 +27,18 @@ These decisions define the initial Entrepreneur Codex foundation:
 - `C:\Insurance Desk\.obsidian` is a pending configuration-placement issue rather than a storage migration. The empty `C:\Insurance Desk\Vault` placeholder is not the active vault.
 - The [Tool and Connection Maintenance Contract](CONNECTION_MAINTENANCE.md) is the accepted normative source for capability selection, connection permissions, health checks, maintenance, fallback, revocation, and future Entrepreneur Doctor composition.
 - The [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md) is the accepted normative source for insurance evidence and memory authority, account anchoring, process states, data boundaries, and fixture rules.
+- The [ECC Lite Profile Contract](ECC_LITE_PROFILE.md) is the accepted normative source for the full-harness versus ECC Lite distinction, initial profile, seven-phase operator model, lifecycle safety, minimal evidence, human-governed improvement, deferred capabilities, and Stage 3B boundary.
+
+## ECC Lite design decisions
+
+- The accepted profile ID is `entrepreneur-codex`, and its only target is Codex.
+- The initial shared core contains exactly the unchanged `skill-intent-driven-development` and `skill-agent-introspection-debugging` single-skill modules. No other skill belongs in the profile.
+- Explore, Shape, Plan, Build, Review, Release, and Recover are a human operating model, not seven installed skills.
+- Installation is strict new-install-only behavior. Existing destinations and installed state fail closed; identical content is not adopted.
+- Existing and legacy surfaces may be reported but are not adopted, migrated, merged, overwritten, disabled, or removed.
+- Harness evidence records are reserved for evaluated pilots, material failures, recurring friction patterns, and proposed harness changes.
+- Harness improvement remains human-governed and bounded. Rejection changes nothing; acceptance still passes through normal issue, worktree, pull-request, exact-head review, merge, installation, and activation authority.
+- ECC Lite contains no agent, hook, MCP, connector, or autonomous runtime.
 
 ## Proposed directions — not accepted implementation decisions
 
@@ -35,4 +47,5 @@ These decisions define the initial Entrepreneur Codex foundation:
 - Power Automate, Microsoft List or SharePoint, OneDrive for Business, and Copilot Studio remain candidate Microsoft-side components pending separate user-permission, tenant-policy, data-boundary, and reliability assessment. No specific component, queue schema, folder structure, permission, attachment flow, or synchronization mechanism is selected here.
 - Detailed Microsoft 365 queue, transport, permissions, storage, synchronization, connector, reconciliation, and revocation design belongs to a later private Insurance Ops slice using synthetic fixtures for software development.
 - SQLite remains deferred as optional, generated, rebuildable retrieval state. It is not editable authority, and its location and schema are not decided here.
+- Stage 3B remains the recommended ECC repository implementation slice. Its accepted boundary is documented, but implementation, installation, and activation are not authorized or started.
 - These directions do not authorize Insurance Desk changes, a Codex Project or Obsidian configuration change, mailbox access, a connector, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, an external action, or the next implementation slice.
