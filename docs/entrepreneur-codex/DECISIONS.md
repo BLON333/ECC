@@ -27,14 +27,20 @@ These decisions define the initial Entrepreneur Codex foundation:
 - `C:\Insurance Desk\.obsidian` is a pending configuration-placement issue rather than a storage migration. The empty `C:\Insurance Desk\Vault` placeholder is not the active vault.
 - The [Tool and Connection Maintenance Contract](CONNECTION_MAINTENANCE.md) is the accepted normative source for capability selection, connection permissions, health checks, maintenance, fallback, revocation, and future Entrepreneur Doctor composition.
 - The [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md) is the accepted normative source for insurance evidence and memory authority, account anchoring, process states, data boundaries, and fixture rules.
-- The [ECC Lite Profile Contract](ECC_LITE_PROFILE.md) is the accepted normative source for the full-harness versus ECC Lite distinction, initial profile, seven-phase operator model, lifecycle safety, minimal evidence, human-governed improvement, deferred capabilities, and Stage 3B boundary.
+- The [ECC Lite Profile Contract](ECC_LITE_PROFILE.md) is the accepted normative source for the full-harness versus ECC Lite distinction, initial profile, seven-phase operator model, assisted/manual v1 boundary, minimal evidence, human-governed improvement, and deferred capabilities.
 
 ## ECC Lite design decisions
 
 - The accepted profile ID is `entrepreneur-codex`, and its only target is Codex.
 - The initial shared core contains exactly the unchanged `skill-intent-driven-development` and `skill-agent-introspection-debugging` single-skill modules. No other skill belongs in the profile.
 - Explore, Shape, Plan, Build, Review, Release, and Recover are a human operating model, not seven installed skills.
-- Installation is strict new-install-only behavior. Existing destinations and installed state fail closed; identical content is not adopted.
+- V1 uses no automated installer or installed state. Its dependency-free helper is strictly read-only and supports only `preview` and `verify` for an explicitly supplied absolute home and expected source commit.
+- V1 maps the two complete unchanged skill directories only to `<absolute-home>/.agents/skills`. Existing destinations fail closed as collisions; identical content is not adopted or overwritten.
+- Preview derives the actual repository `HEAD`, requires it to equal the expected commit, and byte-binds `package.json` plus both complete skill sources to that exact committed tree. The scoped index must equal `HEAD`, the worktree must equal the index and `HEAD`, and no scoped untracked or ignored path may exist; relevant drift and source hard links fail closed.
+- Preview records the repository version, derived source commit, exact source paths, byte lengths, SHA-256 hashes, manual copy steps, an absolute cwd-independent verification command, and exact manual removal guidance as deterministic JSON.
+- Verification reports expected destination files as matching, missing, or drifted and treats unexpected content or multiple hard links as drift. It writes no state and grants no ownership of existing content.
+- Copying and removal are explicit operator-performed filesystem actions under separate authority. Removal is limited to still-matching listed files followed by empty listed profile directories.
+- V1 is not registered with the generic installer and adds no profile manifest, schema, install state, doctor, repair, uninstall, rollback, activation, dependency, or skill-body change.
 - Existing and legacy surfaces may be reported but are not adopted, migrated, merged, overwritten, disabled, or removed.
 - Harness evidence records are reserved for evaluated pilots, material failures, recurring friction patterns, and proposed harness changes.
 - Harness improvement remains human-governed and bounded. Rejection changes nothing; acceptance still passes through normal issue, worktree, pull-request, exact-head review, merge, installation, and activation authority.
@@ -47,5 +53,5 @@ These decisions define the initial Entrepreneur Codex foundation:
 - Power Automate, Microsoft List or SharePoint, OneDrive for Business, and Copilot Studio remain candidate Microsoft-side components pending separate user-permission, tenant-policy, data-boundary, and reliability assessment. No specific component, queue schema, folder structure, permission, attachment flow, or synchronization mechanism is selected here.
 - Detailed Microsoft 365 queue, transport, permissions, storage, synchronization, connector, reconciliation, and revocation design belongs to a later private Insurance Ops slice using synthetic fixtures for software development.
 - SQLite remains deferred as optional, generated, rebuildable retrieval state. It is not editable authority, and its location and schema are not decided here.
-- Stage 3B remains the recommended ECC repository implementation slice. Its accepted boundary is documented, but implementation, installation, and activation are not authorized or started.
+- Any automated ECC Lite install, state, doctor, repair, uninstall, rollback, or activation lifecycle is deferred to a separately designed and authorized v2. It is not the default next slice.
 - These directions do not authorize Insurance Desk changes, a Codex Project or Obsidian configuration change, mailbox access, a connector, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, an external action, or the next implementation slice.
