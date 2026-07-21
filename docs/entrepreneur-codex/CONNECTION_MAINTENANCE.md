@@ -37,7 +37,9 @@ Every connection record must state:
 
 The technical ability to write never grants operating authority. The Operator Contract and the exact task remain controlling.
 
-Registry entries do not authorize a connector, cloud synchronization, mailbox automation, external data transport, or an external action. The operator-designated private Insurance Desk may be used locally for assist-only work under the boundaries in the [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md#active-local-use-and-approval-boundaries); broader connections and actions remain separately approval-gated.
+Registry entries do not authorize a connector, cloud synchronization, mailbox automation, external data transport, or an external action. The operator-designated private Insurance Desk at `C:\Insurance Desk\Insurance Desk` is the sole canonical insurance working vault and may be used locally for assist-only work under the boundaries in the [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md#active-local-use-and-approval-boundaries); broader connections and actions remain separately approval-gated.
+
+Neither `C:\Dev\products\insurance-form-automation_VAULT` nor `C:\Dev\Brain\Insurance Day` is a connection or fallback. The former is retained legacy/reference-only state requiring separate explicit authority for any access or change; the latter is legacy and is not an insurance evidence or continuity source. `C:\Dev\Brain\CLAUDE.md` may supply read-only personal operating context but never insurance-vault authority.
 
 ## Initial registry: access contract
 
@@ -46,7 +48,7 @@ Registry entries do not authorize a connector, cloud synchronization, mailbox au
 | GitHub | Repository source control and review | Authorized repositories, issues, branches, PRs, and checks | Read; write only an authorized branch and draft PR. No merge by default. | Operator-managed GitHub CLI credential store |
 | Codex instructions | Load Project and repository rules in Codex | `AGENTS.md`, approved Project config, and task context | Read instructions; update only through an authorized repository change | None |
 | Playwright | Future browser testing for software projects | Approved test pages and test artifacts | Planned test-environment access only | Project-local setup; target credentials only if separately approved |
-| Insurance Desk workspace | Active private workspace for Insurance Desk — Operate at `C:\Insurance Desk\Insurance Desk` | Intentionally placed account evidence, briefs, processes, drafts, and temporary ingestion sources | Operator-designated local assist-only read/write; never Git; no connector or cloud access is granted here | Local filesystem; no connection credential configured |
+| Insurance Desk workspace | Sole canonical insurance working vault for Insurance Desk — Operate at `C:\Insurance Desk\Insurance Desk` | Intentionally placed account evidence, briefs, processes, drafts, and temporary ingestion sources | Operator-designated local assist-only read/write; never Git; no connector, legacy-vault access, or cloud access is granted here | Local filesystem; no connection credential configured |
 | Google Drive | Optional future document source | Only explicitly approved files and folders | No access yet | Connector-managed OAuth if later approved |
 | Work Outlook | Communication and documentary evidence; possible future manual work-packet source | No mailbox access in this slice; manually exported or pasted material may be intentionally placed in the Insurance Desk by the operator | Manual source handling only; no autonomous mailbox write, filing, flag, category, draft, or send | Operator's work sign-in remains in Outlook; no connection is configured here |
 | Applied EPIC | Official insurance account and activity record | Records the operator opens or confirms | Assist-only; every read or action is manual | Organization-managed Applied EPIC sign-in |

@@ -7,7 +7,7 @@ recorded in [Decisions](DECISIONS.md). The normative lightweight-profile
 design is the [ECC Lite Profile Contract](ECC_LITE_PROFILE.md).
 
 1. **[Foundation and repository memory](NORTH_STAR.md)** — Establish the purpose, two-lane boundary, fresh-start direction, and durable repository-memory rules.
-2. **[Operating contracts and active Insurance Desk state](PROJECT_SESSION_TOPOLOGY.md#document-responsibilities)** — Governed by the [Codex Project and Session Topology](PROJECT_SESSION_TOPOLOGY.md), [Tool and Connection Maintenance Contract](CONNECTION_MAINTENANCE.md), and [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md). The active private Insurance Desk supports operator-designated assist-only work outside Git while local Obsidian and Project configuration stabilization remains pending.
+2. **[Operating contracts and insurance ownership](PROJECT_SESSION_TOPOLOGY.md#document-responsibilities)** — Governed by the [Codex Project and Session Topology](PROJECT_SESSION_TOPOLOGY.md), [Tool and Connection Maintenance Contract](CONNECTION_MAINTENANCE.md), and [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md). ECC owns the shared contracts, Insurance Automation owns its software, and `C:\Insurance Desk\Insurance Desk` is the sole canonical insurance working vault. The old automation vault is retained legacy/reference-only, and Brain/Insurance Day is not an insurance evidence or continuity source.
 3. **[Lightweight Entrepreneur ECC profile](ECC_LITE_PROFILE.md)** —
    Stage 3A.2 completed the design, and
    [Stage 3B v1](ECC_LITE_PROFILE.md#stage-3b-v1-implementation-boundary)

@@ -5,9 +5,9 @@ ECC is the lightweight shared capability layer for Jason's Codex-first workspace
 The workspace supports two lanes:
 
 - **Software Studio** builds separate software products for users and customers.
-- **Internal Automation** improves Jason's own personal and work processes, beginning with private commercial-insurance assistance.
+- **Internal Automation** improves Jason's own personal and work processes, beginning with private commercial-insurance assistance owned by the separate Insurance Automation domain.
 
-The lanes may share a simple ECC-based operating foundation, but products and automation software remain in separate repositories. Their code, credentials, and runtime permissions also remain separate. Local live insurance working data belongs in the operator-designated private Insurance Desk workspace at `C:\Insurance Desk\Insurance Desk`, outside Git; it never belongs in a software repository or worktree.
+The lanes may share a simple ECC-based operating foundation, but products and automation software remain in separate repositories. Their code, credentials, runtime permissions, and domain ownership also remain separate. ECC owns the shared capability and these operating contracts; it does not own insurance software or insurance working material. Local live insurance working data belongs only in the operator-designated private Insurance Desk workspace at `C:\Insurance Desk\Insurance Desk`, outside Git; it never belongs in a software repository, worktree, the retained legacy `C:\Dev\products\insurance-form-automation_VAULT`, or `C:\Dev\Brain\Insurance Day`.
 
 The system grows one understandable, testable slice at a time. Committed repository work follows the [Codex Project and Session Topology](PROJECT_SESSION_TOPOLOGY.md), the normative source for Project, thread, active-writer, and worktree mechanics.
 

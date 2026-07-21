@@ -1,14 +1,16 @@
 # Insurance Knowledge Architecture
 
-This contract defines the operator-designated active private Insurance Desk workspace for assist-only insurance work. It separates local live working data from insurance-assistance software and Git. This documentation correction does not create, inspect, migrate, reorganize, or configure the workspace, its contents, a database, a connector, or an ingestion runtime.
+This contract defines the operator-designated sole canonical Insurance Desk working vault for assist-only insurance work. It separates local live working data from insurance-assistance software, ECC, and Git. This documentation correction does not create, inspect, migrate, reorganize, or configure the workspace, its contents, a database, a connector, or an ingestion runtime.
 
 ## Status and location
 
-- Active private content tree and intended Obsidian operating vault: `C:\Insurance Desk\Insurance Desk`
+- Sole canonical insurance working vault and active private content tree: `C:\Insurance Desk\Insurance Desk`
 - Selected boundary for Insurance Desk — Operate: `C:\Insurance Desk\Insurance Desk`
 - Possible future Codex Project boundary: the same content tree, after local Obsidian and Project configuration is stabilized
 
 The `.obsidian` directory currently located at `C:\Insurance Desk\.obsidian` is a configuration-placement issue to reconcile separately; it does not invalidate the selected content tree. `C:\Insurance Desk\Vault` is an empty placeholder, not the intended active vault. This contract records the operator's designation and does not claim employer, regulatory, insurer, or third-party approval that has not been evidenced.
+
+Insurance Automation owns the software workflow; Insurance Desk owns private insurance working material; ECC owns neither and records only the cross-domain contract. `C:\Dev\products\insurance-form-automation_VAULT` is retained legacy/reference-only state and must not be read, written, migrated, merged, or deleted without separate explicit authority. `C:\Dev\Brain\Insurance Day` is legacy and is not an insurance evidence or continuity source; no insurance working notes belong there. `C:\Dev\Brain\CLAUDE.md` is only a read-only personal operating profile, not an insurance vault or system of record.
 
 ## Authority
 
@@ -16,7 +18,7 @@ The `.obsidian` directory currently located at `C:\Insurance Desk\.obsidian` is 
 |---|---|
 | Applied EPIC | Official account and activity record. The operator performs and confirms every live action there. |
 | Outlook and original documents | Communication and documentary evidence whose identity, date, and provenance must be retained. |
-| Insurance Desk in Obsidian | Curated human-readable and AI-readable operating memory for retrieval, drafting, and review. It does not replace Applied EPIC, Outlook, or original source evidence. |
+| Canonical Insurance Desk vault | Curated human-readable and AI-readable operating memory at `C:\Insurance Desk\Insurance Desk` for retrieval, drafting, and review. It does not replace Applied EPIC, Outlook, or original source evidence. |
 | Generated state | Optional derived indexes for retrieval. Generated state is rebuildable and is never an editable source of authority. |
 | Conversations | Temporary working context, not durable account memory or process approval. |
 | GitHub | Authority for software and repository documentation only; it never stores private client material. |
@@ -125,7 +127,7 @@ When there is doubt, use a fully synthetic fixture instead. No real or source-de
 
 ## Active local use and approval boundaries
 
-The operator has designated `C:\Insurance Desk\Insurance Desk` for private, local, assist-only work with intentionally placed real insurance material. Local real-data use is not blocked merely because the workspace is under `C:\Insurance Desk`. This operator designation does not imply unevidenced organization, regulatory, insurer, or third-party approval.
+The operator has designated `C:\Insurance Desk\Insurance Desk` as the sole canonical location for private, local, assist-only work with intentionally placed real insurance material. Local real-data use is not blocked merely because the workspace is under `C:\Insurance Desk`. This operator designation does not imply unevidenced organization, regulatory, insurer, or third-party approval, and it grants no access to either excluded legacy location.
 
 The following remain prohibited without separate exact authority:
 

@@ -28,6 +28,14 @@ doctor, repair, or uninstall integration. No skill has been installed or
 activated, and no runtime, connector, MCP, agent, hook, external-system access,
 or private-data change was created.
 
+Insurance ownership remains external to ECC: Insurance Automation owns its
+software, and `C:\Insurance Desk\Insurance Desk` is the sole canonical insurance
+working vault. The retained `C:\Dev\products\insurance-form-automation_VAULT`
+and legacy `C:\Dev\Brain\Insurance Day` are not active insurance working or
+fallback locations. This repository state grants no authority to inspect or
+change any insurance vault, Obsidian configuration, private data, or external
+repository.
+
 [ECC PR #7](https://github.com/BLON333/ECC/pull/7) is superseded for v1. Its
 automated install, state, doctor, repair, and uninstall lifecycle remains
 deferred to a separately designed and authorized v2; it is not an active
