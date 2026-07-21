@@ -31,4 +31,21 @@ Automatic permission to prepare repository changes remains subject to the [Codex
 - Production data changes
 - Deletion of remote resources
 
+## Review and merge gate
+
+Before review begins, capture the current live pull-request head as `H`. An
+accepted pre-merge review must satisfy
+`review.commit_id == H` and must be submitted before the merge. Every
+actionable review thread against `H` must be resolved or explicitly
+dispositioned before merge. A replacement commit, autofix, rebase, or other
+head change creates a new `H` and restarts the review gate; review of an earlier
+head is not reusable.
+
+Immediately before merge, reread the live pull-request head and fail closed if
+it differs from the reviewed `H`. The closeout evidence must prove
+`review.submitted_at < PR.merged_at`. A review that arrives after merge is
+follow-up evidence only and may create correction debt; it never proves that
+review gated the merge. Passing this review gate does not itself grant merge
+authority.
+
 Ambiguous authority fails closed. Preparation does not grant permission to perform a consequential action, and the system must not broaden its own permissions.
