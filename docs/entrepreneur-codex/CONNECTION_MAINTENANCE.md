@@ -77,7 +77,7 @@ Future work-email automation is expected to keep Microsoft 365 as the mailbox-mo
 
 Work IQ remains a possible future direct connection but is currently blocked by Microsoft Entra tenant administration. Any service-principal provisioning or administrative consent is consequential and separately gated, so Work IQ remains parked and must not block the current system. Power Automate, Microsoft List or SharePoint, OneDrive for Business, and Copilot Studio remain candidate components pending a separate user-permission, tenant-policy, data-boundary, and reliability assessment.
 
-This proposed architecture does not activate a connection or authorize mailbox access, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, or another external action. Detailed queue, transport, permissions, storage, synchronization, attachment, and connector design remains a later private Insurance Ops task.
+This proposed architecture does not activate a connection or authorize mailbox access, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, or another external action. Detailed software queue, transport, connector, and reconciliation design remains a later Insurance Automation — Build task using synthetic fixtures. Any mailbox permission or Microsoft administration remains separately approval-gated, and any Insurance Desk storage, synchronization, attachment handling, or operating-process change remains separately authorized under Insurance Desk — Operate.
 
 ## Maintenance rhythm
 

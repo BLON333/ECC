@@ -152,7 +152,7 @@ Future work-email automation is expected to use a two-plane architecture:
 - Power Automate, Microsoft List or SharePoint, OneDrive for Business, and Copilot Studio remain candidate Microsoft-side components pending separate user-permission, tenant-policy, data-boundary, and reliability assessment.
 - Initial transport remains manual.
 
-This proposed architecture does not authorize mailbox access, a connector, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, or any external action. Detailed queue, transport, permissions, storage, synchronization, attachment, and connector design belongs to a later private Insurance Ops slice using synthetic fixtures for software development.
+This proposed architecture does not authorize mailbox access, a connector, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, or any external action. Detailed software queue, transport, connector, and reconciliation design belongs to a later Insurance Automation — Build slice using synthetic fixtures. Any mailbox permission or Microsoft administration remains separately approval-gated, and any Insurance Desk storage, synchronization, attachment handling, or operating-process change remains separately authorized under Insurance Desk — Operate.
 
 ## Deferred generated retrieval state
 
