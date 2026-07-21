@@ -33,7 +33,8 @@ Automatic permission to prepare repository changes remains subject to the [Codex
 
 ## Review and merge gate
 
-For a pull-request head `H`, an accepted pre-merge review must satisfy
+Before review begins, capture the current live pull-request head as `H`. An
+accepted pre-merge review must satisfy
 `review.commit_id == H` and must be submitted before the merge. Every
 actionable review thread against `H` must be resolved or explicitly
 dispositioned before merge. A replacement commit, autofix, rebase, or other
