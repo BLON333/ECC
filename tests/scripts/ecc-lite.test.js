@@ -349,6 +349,75 @@ function runTests() {
       }
     }],
 
+    ['link inspection starts at the explicit trust boundary', () => {
+      const realContainer = createTempDir('ecc-lite-real-ancestor-');
+      const linkContainer = createTempDir('ecc-lite-linked-ancestor-');
+      const sourceContainer = createTempDir('ecc-lite-linked-source-');
+      const linkedAncestor = path.join(linkContainer, 'linked-parent');
+      const homeDir = path.join(linkedAncestor, 'home');
+      const realHome = path.join(realContainer, 'linked-home-target');
+      const linkedHome = path.join(linkContainer, 'linked-home');
+      try {
+        fs.symlinkSync(
+          realContainer,
+          linkedAncestor,
+          process.platform === 'win32' ? 'junction' : 'dir'
+        );
+        fs.mkdirSync(homeDir);
+
+        const preview = run('preview', homeDir);
+        assert.strictEqual(preview.code, 0, preview.stderr);
+        assert.strictEqual(preview.json.status, 'ready');
+        const verification = run('verify', homeDir);
+        assert.strictEqual(verification.code, 2, verification.stderr);
+        assert.strictEqual(verification.json.status, 'missing');
+
+        fs.mkdirSync(realHome);
+        fs.symlinkSync(
+          realHome,
+          linkedHome,
+          process.platform === 'win32' ? 'junction' : 'dir'
+        );
+        const linkedHomePreview = run('preview', linkedHome);
+        assert.strictEqual(linkedHomePreview.code, 2, linkedHomePreview.stderr);
+        assert.strictEqual(linkedHomePreview.json.status, 'blocked');
+        assert.ok(linkedHomePreview.json.collisions.every(collision =>
+          collision.kind === 'unsafe_ancestor'
+          && collision.path === linkedHome
+          && collision.reason === 'symbolic_link'
+        ));
+
+        const fixture = createSourceRepo(sourceContainer);
+        const linkedSource = path.join(
+          fixture.repoRoot,
+          'skills',
+          EXPECTED_SKILLS[0]
+        );
+        const realSource = path.join(sourceContainer, 'linked-source-target');
+        fs.mkdirSync(realSource);
+        fs.writeFileSync(path.join(realSource, 'SKILL.md'), '# linked source\n', 'utf8');
+        fs.rmSync(linkedSource, { recursive: true });
+        fs.symlinkSync(
+          realSource,
+          linkedSource,
+          process.platform === 'win32' ? 'junction' : 'dir'
+        );
+        const linkedSourcePreview = runScript(
+          fixture.scriptPath,
+          'preview',
+          path.join(sourceContainer, 'home'),
+          fixture.commit,
+          { cwd: sourceContainer }
+        );
+        assert.strictEqual(linkedSourcePreview.code, 1);
+        assert.strictEqual(linkedSourcePreview.errorJson.error.code, 'UNSAFE_SOURCE');
+      } finally {
+        cleanup(sourceContainer);
+        cleanup(linkContainer);
+        cleanup(realContainer);
+      }
+    }],
+
     ['the explicit home is required and inherited HOME is ignored', () => {
       const inheritedHome = createTempDir('ecc-lite-inherited-home-');
       try {

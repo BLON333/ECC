@@ -161,13 +161,25 @@ function parseArgs(argv) {
   return Object.freeze({ operation, home, sourceCommit });
 }
 
-function inspectExistingChain(candidatePath, includeCandidate = true) {
-  const parsed = path.parse(candidatePath);
-  const relative = path.relative(parsed.root, candidatePath);
+function inspectExistingChain(candidatePath, approvedRoot, includeCandidate = true) {
+  if (!isContained(approvedRoot, candidatePath)) {
+    return Object.freeze({ path: candidatePath, reason: 'outside_approved_root' });
+  }
+
+  const relative = path.relative(approvedRoot, candidatePath);
   const segments = relative.split(path.sep).filter(Boolean);
   const inspectedSegments = includeCandidate ? segments : segments.slice(0, -1);
 
-  let current = parsed.root;
+  let current = approvedRoot;
+  const rootStats = lstatIfPresent(current);
+  if (rootStats?.isSymbolicLink()) {
+    return Object.freeze({ path: current, reason: 'symbolic_link' });
+  }
+  if (rootStats && !rootStats.isDirectory()) {
+    return Object.freeze({ path: current, reason: 'non_directory_ancestor' });
+  }
+  if (!rootStats) return null;
+
   for (const segment of inspectedSegments) {
     current = path.join(current, segment);
     const stats = lstatIfPresent(current);
@@ -186,7 +198,7 @@ function readRegularFile(filePath, approvedRoot, options = {}) {
   if (!isContained(approvedRoot, filePath)) {
     fail('UNSAFE_SOURCE', 'A source file escaped the repository root.');
   }
-  const ancestorIssue = inspectExistingChain(filePath, false);
+  const ancestorIssue = inspectExistingChain(filePath, approvedRoot, false);
   if (ancestorIssue) {
     fail('UNSAFE_SOURCE', 'A source ancestor is not a real directory.');
   }
@@ -224,7 +236,7 @@ function readRegularFile(filePath, approvedRoot, options = {}) {
 }
 
 function listSourceFiles(directoryPath, approvedRoot) {
-  const issue = inspectExistingChain(directoryPath);
+  const issue = inspectExistingChain(directoryPath, approvedRoot);
   if (issue) fail('UNSAFE_SOURCE', 'A skill source directory is unsafe.');
   const stats = lstatIfPresent(directoryPath);
   if (!stats || !stats.isDirectory() || stats.isSymbolicLink()) {
@@ -379,8 +391,8 @@ function destinationFor(home, sourceFile) {
   return Object.freeze({ skillsRoot, skillRoot, destinationPath });
 }
 
-function classifyCollision(skillRoot) {
-  const ancestorIssue = inspectExistingChain(skillRoot, false);
+function classifyCollision(skillRoot, approvedRoot) {
+  const ancestorIssue = inspectExistingChain(skillRoot, approvedRoot, false);
   if (ancestorIssue) {
     return Object.freeze({
       kind: 'unsafe_ancestor',
@@ -475,7 +487,7 @@ function preview(home, sourceCommit) {
   const collisions = SKILLS.map(skill => {
     const representative = source.files.find(file => file.skill === skill);
     const skillRoot = destinationFor(home, representative).skillRoot;
-    const collision = classifyCollision(skillRoot);
+    const collision = classifyCollision(skillRoot, home);
     return collision ? Object.freeze({ skill, ...collision }) : null;
   }).filter(Boolean);
   const ready = collisions.length === 0;
@@ -497,7 +509,7 @@ function preview(home, sourceCommit) {
 
 function inspectDestinationFile(home, sourceFile) {
   const destination = destinationFor(home, sourceFile);
-  const ancestorIssue = inspectExistingChain(destination.destinationPath, false);
+  const ancestorIssue = inspectExistingChain(destination.destinationPath, home, false);
   const common = {
     skill: sourceFile.skill,
     relativePath: normalizeForReport(path.relative(destination.skillsRoot, destination.destinationPath)),
@@ -572,7 +584,7 @@ function findUnexpectedEntries(home, source) {
 
   return SKILLS.flatMap(skill => {
     const skillRoot = safeJoin(skillsRoot, skill);
-    if (inspectExistingChain(skillRoot, false)) return [];
+    if (inspectExistingChain(skillRoot, home, false)) return [];
     return listDestinationEntries(skillRoot, skillsRoot);
   }).filter(entry => entry.type === 'directory'
     ? !expectedDirectories.has(entry.relativePath)
