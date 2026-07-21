@@ -39,7 +39,7 @@ The technical ability to write never grants operating authority. The Operator Co
 
 Registry entries do not authorize a connector, cloud synchronization, mailbox automation, external data transport, or an external action. The operator-designated private Insurance Desk at `C:\Insurance Desk\Insurance Desk` is the sole canonical insurance working vault and may be used locally for assist-only work under the boundaries in the [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md#active-local-use-and-approval-boundaries); broader connections and actions remain separately approval-gated.
 
-Neither `C:\Dev\products\insurance-form-automation_VAULT` nor `C:\Dev\Brain\Insurance Day` is a connection or fallback. The former is retained legacy/reference-only state requiring separate explicit authority for any access or change; the latter is legacy and is not an insurance evidence or continuity source. `C:\Dev\Brain\CLAUDE.md` may supply read-only personal operating context but never insurance-vault authority.
+Neither `C:\Dev\products\insurance-form-automation` (`BLON333/insurance-form-automation`), `C:\Dev\products\insurance-form-automation_VAULT`, nor `C:\Dev\Brain\Insurance Day` is a connection or fallback. The legacy repository and vault may be consulted only under separate explicit read authority; neither is current authority or a runtime dependency, and neither may be changed without separate explicit authority. `C:\Dev\Brain\Insurance Day` is not an insurance evidence or continuity source. `C:\Dev\Brain\CLAUDE.md` may supply read-only personal operating context but never insurance-vault authority.
 
 ## Initial registry: access contract
 
@@ -77,7 +77,7 @@ Future work-email automation is expected to keep Microsoft 365 as the mailbox-mo
 
 Work IQ remains a possible future direct connection but is currently blocked by Microsoft Entra tenant administration. Any service-principal provisioning or administrative consent is consequential and separately gated, so Work IQ remains parked and must not block the current system. Power Automate, Microsoft List or SharePoint, OneDrive for Business, and Copilot Studio remain candidate components pending a separate user-permission, tenant-policy, data-boundary, and reliability assessment.
 
-This proposed architecture does not activate a connection or authorize mailbox access, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, or another external action. Detailed software queue, transport, connector, and reconciliation design remains a later Insurance Automation — Build task using synthetic fixtures. Any mailbox permission or Microsoft administration remains separately approval-gated, and any Insurance Desk storage, synchronization, attachment handling, or operating-process change remains separately authorized under Insurance Desk — Operate.
+This proposed architecture does not activate a connection or authorize mailbox access, cloud synchronization, automated flags, categories, drafts, sends, attachment transfer, or another external action. Detailed software queue, transport, connector, and reconciliation design remains a later Insurance Ops — Build task using synthetic fixtures. Any mailbox permission or Microsoft administration remains separately approval-gated, and any Insurance Desk storage, synchronization, attachment handling, or operating-process change remains separately authorized under Insurance Desk — Operate.
 
 ## Maintenance rhythm
 
