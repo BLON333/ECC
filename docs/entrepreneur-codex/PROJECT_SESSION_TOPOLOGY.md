@@ -31,7 +31,7 @@ Each contract has one normative responsibility. Summaries and cross-references d
 | Worktree | An isolated Git workbench for an authorized writing task. It is temporary execution space, not a Codex Project. |
 | ECC Skill | A repeatable workflow loaded when a task needs it. The durable workflow belongs in ECC's native `skills/` surface. |
 | MCP or connector | Controlled access to another system. It supplies tools or data but does not grant authority to act. |
-| Insurance Desk workspace | Active private operating area and intended Obsidian vault at `C:\Insurance Desk\Insurance Desk`. It is outside Git and is not a repository, worktree, or system of record. |
+| Insurance Desk workspace | Sole canonical insurance working vault and active private operating area at `C:\Insurance Desk\Insurance Desk`. It is outside Git and is not a repository, worktree, or system of record. |
 
 ECC's native `ecc.session.v1` snapshots may later report runtime, worker, branch, and worktree status. They are execution telemetry, not a replacement for Codex Projects, focused threads, or durable business memory.
 
@@ -42,13 +42,13 @@ These are the intended Project boundaries. Naming a Project here does not create
 | Project | Boundary | Purpose |
 |---|---|---|
 | ECC | `C:\DevV2\ECC` | Maintain the shared lightweight capability and operating contracts. |
-| Insurance Ops — Build | `C:\DevV2\automations\insurance-ops` | Build, test, and improve the insurance-assistance software. It contains software, not live client working memory. |
-| Insurance Desk — Operate | `C:\Insurance Desk\Insurance Desk` | Active private operating area for assist-only insurance work from source materials, account history, Approved processes, and generated drafts. It may become the Codex Project boundary after local Obsidian and Project configuration is stabilized. |
+| Insurance Ops — Build | `C:\DevV2\automations\insurance-ops` | Own, build, test, and improve the insurance-assistance software in `BLON333/operator-insurance-ops`. It contains software, not live client working memory. Governed writes use that repository's authorized worktree lane. |
+| Insurance Desk — Operate | `C:\Insurance Desk\Insurance Desk` | Sole canonical insurance working vault and active private operating area for assist-only insurance work from source materials, account history, Approved processes, and generated drafts. It may become the Codex Project boundary after local Obsidian and Project configuration is stabilized. |
 | Future Product | A separate repository and Project, only when a real product exists | Build that product without mixing it into ECC or insurance operations. |
 
-**Insurance Ops — Build** and **Insurance Desk — Operate** are deliberately separate. Build changes the software. Operate uses approved software and private evidence to prepare real work. Build has no implied access to client data, and Operate has no implied authority to change software or perform an external action.
+**ECC**, **Insurance Ops — Build**, and **Insurance Desk — Operate** have separate ownership. ECC maintains shared capability and these contracts. Build owns and changes the insurance software. Operate uses approved software and private evidence to prepare real work. Build has no implied access to client data, and Operate has no implied authority to change software or perform an external action.
 
-`C:\Insurance Desk\Insurance Desk` is the operator-designated active private Insurance Desk content tree and intended Obsidian operating vault. It is not an Insurance Ops — Build worktree or part of the software repository. Its possible use as the Insurance Desk — Operate Codex Project remains pending local Obsidian and Project configuration stabilization. This documentation correction does not create, inspect, configure, or modify that workspace.
+`C:\Insurance Desk\Insurance Desk` is the operator-designated sole canonical insurance working vault and active private Insurance Desk content tree. It is not an Insurance Ops — Build worktree or part of the software repository. `C:\Dev\products\insurance-form-automation` (`BLON333/insurance-form-automation`) is a legacy/inactive repository, not current build authority or a runtime dependency. It may be consulted as reference material only under separate explicit read authority and must not be written, migrated, merged, or reactivated without separate explicit authority. `C:\Dev\products\insurance-form-automation_VAULT` is retained legacy state, not current authority. It may be consulted as reference material only under separate explicit read authority, and it must not be written, migrated, merged, or deleted without separate explicit authority. `C:\Dev\Brain\Insurance Day` is legacy and is not an insurance evidence or continuity source; insurance working notes must not be created, read, or updated there. `C:\Dev\Brain\CLAUDE.md` remains only a read-only personal operating profile, not an insurance vault. This documentation correction does not inspect, configure, or modify any of those locations.
 
 ## Operating rules
 

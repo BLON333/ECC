@@ -28,6 +28,17 @@ doctor, repair, or uninstall integration. No skill has been installed or
 activated, and no runtime, connector, MCP, agent, hook, external-system access,
 or private-data change was created.
 
+Insurance ownership remains external to ECC: `Insurance Ops — Build` owns the
+software in `C:\DevV2\automations\insurance-ops`
+(`BLON333/operator-insurance-ops`), and `C:\Insurance Desk\Insurance Desk` is
+the sole canonical insurance working vault. The retained legacy repository at
+`C:\Dev\products\insurance-form-automation` (`BLON333/insurance-form-automation`),
+its sibling
+`C:\Dev\products\insurance-form-automation_VAULT`, and
+`C:\Dev\Brain\Insurance Day` are not active build, working, or fallback
+locations. This repository state grants no authority to inspect or change any
+insurance vault, Obsidian configuration, private data, or external repository.
+
 [ECC PR #7](https://github.com/BLON333/ECC/pull/7) is superseded for v1. Its
 automated install, state, doctor, repair, and uninstall lifecycle remains
 deferred to a separately designed and authorized v2; it is not an active
