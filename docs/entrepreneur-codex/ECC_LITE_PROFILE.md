@@ -1,9 +1,10 @@
 # ECC Lite Profile Contract
 
-This document is the normative contract for ECC Lite inside Entrepreneur
-Codex. Stage 3A.2 accepts the design only. It does not implement, install, or
-activate a profile, and it grants no implementation or external-action
-authority.
+This document is the normative v1 contract for ECC Lite inside Entrepreneur
+Codex. Stage 3A.2 accepted the design. Stage 3B v1 adds only a read-only helper
+for previewing and verifying an explicit assisted/manual copy. It does not
+copy, install, repair, remove, or activate anything, and it grants no
+external-action authority.
 
 ## Entrepreneur Codex and ECC Lite
 
@@ -19,8 +20,9 @@ Entrepreneur Codex is the complete human-governed harness:
 - durable evidence; and
 - ECC Lite.
 
-ECC Lite is only the small ECC-managed installable profile inside that larger
-harness. It is not the harness itself.
+ECC Lite is only the small ECC-managed capability profile inside that larger
+harness. V1 is delivered by explicit assisted/manual copying, not an automated
+installer. ECC Lite is not the harness itself.
 
 ECC Lite is not:
 
@@ -45,7 +47,8 @@ ECC Lite is not:
 | Target | Codex only |
 | Shared-core modules | Exactly `skill-intent-driven-development` and `skill-agent-introspection-debugging` |
 | Skill bodies | The existing skills remain unchanged |
-| Installation state | Not implemented, installed, or activated by Stage 3A.2 |
+| V1 delivery | Read-only preview and verification plus explicit assisted/manual copying |
+| Installation state | No repository change installs or activates the profile |
 
 No other skill belongs in the initial shared profile.
 
@@ -56,9 +59,10 @@ No other skill belongs in the initial shared profile.
 | `skill-intent-driven-development` | `intent-driven-development` |
 | `skill-agent-introspection-debugging` | `agent-introspection-debugging` |
 
-These two `skill-*` names are loader-generated synthetic single-skill module
-IDs. Each points to the existing unchanged skill shown beside it; neither is a
-new module, a new skill, or a skill-body change. The profile remains exactly
+These two `skill-*` names are the synthetic single-skill module IDs recorded by
+the Stage 3A.2 design. The v1 helper does not register them with the generic
+installer; it maps the two existing skill directories directly. Neither name
+creates a module, a skill, or a skill-body change. The profile remains exactly
 these two existing skills.
 
 `intent-driven-development`:
@@ -180,7 +184,8 @@ A proposal must identify:
 
 Rejection changes nothing. Acceptance does not install or activate a change.
 An accepted proposal still requires a normal issue, worktree, pull request,
-exact-head review, merge, installation, and activation authority.
+exact-head review, merge, and any separately required use or activation
+authority.
 
 The harness may never autonomously weaken or rewrite:
 
@@ -191,85 +196,119 @@ The harness may never autonomously weaken or rewrite:
 - operator authority; or
 - acceptance logic.
 
-## Safe install and lifecycle contract
+## Assisted/manual v1 contract
 
-This section freezes the intended later Stage 3B lifecycle. It does not
-authorize any lifecycle operation.
+Stage 3B v1 deliberately avoids an automated filesystem lifecycle. The
+repository helper is:
 
-### Destinations
+> `<absolute-node> <absolute-repository>/scripts/ecc-lite.js <preview|verify> --home <absolute-home> --source-commit <expected-40-character-lowercase-commit>`
 
-New ECC-managed Codex user skills belong under:
+Both operations are read-only. The helper never creates a directory, copies a
+file, writes state, repairs content, removes content, invokes the generic ECC
+installer, or changes Codex configuration.
 
-> `$HOME/.agents/skills`
+### Explicit inputs and sources
 
-The ECC installed-state file may remain at:
+The operator must supply:
 
-> `$HOME/.codex/ecc-install-state.json`
+- an absolute non-root home path, without `.` or `..` segments; and
+- the expected exact lowercase 40-character repository commit being inspected.
 
-These are separate trusted roots. Stage 3B must enforce canonical containment
-for both, and no managed path may escape the approved skill root or the exact
-installed-state location.
+The helper does not infer a home from environment variables. It records the
+actual commit derived from the checkout and reads the repository version from
+`package.json`. The expected commit must equal the derived `HEAD`; a mismatch
+fails closed. The operator should obtain the expected value from the same
+checkout, normally with `git rev-parse HEAD`.
 
-### Read-only operations
+The source inventory is restricted to the complete regular-file contents of:
 
-The following operations remain read-only:
+- `skills/intent-driven-development`; and
+- `skills/agent-introspection-debugging`.
 
-- plan;
-- inspection;
-- list-installed;
-- doctor; and
-- every dry-run mode.
+The inventory is sorted and records each repository-relative source path,
+absolute source path, byte length, and SHA-256 hash. Symbolic links, special
+filesystem objects, multiple hard links, missing skills, source escapes, or
+source identity changes fail closed.
 
-### New-install collision policy
+The helper uses closed, read-only Git commands in the fixed repository root to
+derive `HEAD`, enumerate the relevant committed tree, and read its blobs. The
+working `package.json` and complete contents of both source skill directories
+must have exactly the same tracked paths and bytes as that commit. The relevant
+index must equal `HEAD`, the relevant worktree must equal both the index and
+`HEAD`, and no relevant untracked or ignored path may exist. A modified, staged,
+deleted, untracked, ignored, linked, or otherwise additional relevant source
+fails closed. Restoring working bytes cannot hide different staged bytes. The
+receipt therefore binds `repoCommit`, repository version, inventory, and hashes
+to the same exact `HEAD` source.
 
-A pristine first install requires both intended skill destinations to be absent,
-and the ECC installed-state file to be absent.
+### Destination and preview
 
-A new installation must fail closed when:
+The only destination mapping is:
 
-- either intended skill destination already exists;
-- the ECC installed-state file already exists;
-- an intended destination is a symlink, junction, or path escape; or
-- state is missing, malformed, or inconsistent while prior or partial
-  ECC-managed artifacts exist.
+> `<absolute-home>/.agents/skills/<skill>/<source-relative-file>`
 
-Missing state by itself is not a pristine first-install collision when both
-intended destinations are absent and no prior or partial ECC-managed artifacts
-exist. Missing, malformed, or inconsistent state must fail closed when prior or
-partial ECC-managed artifacts exist.
+`preview` reports the profile, source version and commit, exact source
+inventory, destination root, collisions, manual copy steps, verification
+command, and manual removal guidance as deterministic JSON.
 
-Identical existing content must not be silently adopted.
+The emitted verification command records the absolute Node executable and
+absolute helper path. It is safe to replay from another working directory
+without resolving an unrelated local `scripts/ecc-lite.js`.
+
+Exit status `0` means preview is `ready` or verification is `matching`. Exit
+status `2` means a valid read-only report is blocked, missing, or drifted. Exit
+status `1` means arguments, sources, paths, or inspection failed validation.
+
+Both skill destinations must be absent before copying begins. Any existing
+destination is a collision, including identical content. A symlink, junction,
+non-directory ancestor, or path escape blocks the preview. The helper neither
+adopts nor overwrites existing content.
+
+When the preview status is `ready`, its `manualCopySteps` tell the operator
+which directories to create and which exact source file to copy to each exact
+destination. Every copy step carries the expected SHA-256 and specifies no
+overwrite. The operator, not the helper, performs those steps using a trusted
+local filesystem tool and only under separate authority.
+
+### Read-only verification
+
+After an assisted/manual copy, `verify` compares each expected destination
+file with its source hash and reports it as:
+
+- `matching` when it is a regular file with exactly one hard link and the
+  expected SHA-256;
+- `missing` when the expected file is absent; or
+- `drifted` when its hash differs, it has multiple hard links, or its
+  filesystem type is unsafe.
+
+Unexpected files or directories inside either profile skill are also drift.
+The complete status is `matching`, `missing`, or `drifted`; only `matching`
+exits successfully. Verification does not create state and does not establish
+ownership of pre-existing content.
+
+### Manual removal
+
+Every report includes exact manual removal guidance. The operator must first
+run `verify`, then:
+
+1. remove only a listed file that is still reported `matching` and whose
+   link count is exactly one and whose SHA-256 still equals the listed required
+   hash;
+2. stop and review any missing, changed, linked, or otherwise unsafe file;
+3. remove only the listed profile directory when it is empty; and
+4. preserve every unrelated file, non-empty directory, legacy location, and
+   Codex configuration file.
+
+The helper does not remove files or directories. There is no ECC Lite v1
+installed-state file, doctor operation, automatic repair, automatic uninstall,
+rollback engine, adoption, migration, or automated activation.
 
 ### Legacy surfaces
 
-Existing legacy locations, including:
-
-- `$HOME/.codex/skills`;
-- generated wrappers;
-- plugin caches;
-- previous installations; and
-- quarantined artifacts;
-
-may be reported but must not be moved, adopted, overwritten, disabled, merged,
-or deleted. Legacy migration or coexistence remains a separate future design.
-
-### Doctor, repair, and uninstall
-
-For the future `entrepreneur-codex` Stage 3B profile, doctor must remain
-read-only and fail closed without valid matching ECC state. This is an
-intentional profile-specific Stage 3B contract; it does not claim that current
-general ECC doctor behavior already implements it.
-
-Repair and uninstall must:
-
-- require valid matching ECC state;
-- begin with dry-run;
-- touch only recorded ECC-managed files;
-- preserve unrelated files;
-- block destructive removal when managed content has drifted; and
-- refuse path or symlink escapes.
-
-Actual install, repair, uninstall, or migration remains separately authorized.
+Existing legacy locations, including `$HOME/.codex/skills`, generic ECC
+install state, generated wrappers, plugin caches, and previous installations,
+are outside the v1 helper. They are not inspected as authority and must not be
+moved, adopted, overwritten, disabled, merged, or removed by this profile.
 
 ## Deferred and excluded capabilities
 
@@ -290,7 +329,9 @@ The following are explicitly deferred and excluded from ECC Lite:
 - self-editing loops;
 - evolutionary search;
 - telemetry platforms;
-- autonomous installation or activation;
+- automated installation or activation;
+- install-state management;
+- doctor, repair, or uninstall integration;
 - legacy migration or cleanup;
 - email automation;
 - Outlook access;
@@ -302,47 +343,35 @@ The following are explicitly deferred and excluded from ECC Lite:
 - Insurance Desk modification; and
 - account-intelligence design.
 
-## Stage 3B implementation boundary
+## Stage 3B v1 implementation boundary
 
-Stage 3B is a possible later implementation slice. It is recommended, not
-authorized or started. A separate, exact authority grant is required.
+The accepted Stage 3B v1 repository slice contains only:
 
-A separately authorized Stage 3B may implement only:
+1. this contract and the corresponding current-state, decision, and roadmap
+   updates;
+2. one dependency-free Node.js helper with only `preview` and `verify`;
+3. exact inventory and SHA-256 receipts for the two unchanged skill sources;
+4. an explicit absolute-home input plus an expected source commit that must
+   equal derived `HEAD`;
+5. deterministic structured manual copy and removal guidance;
+6. fail-closed source-tree, collision, path, symlink, and hard-link reporting;
+7. read-only missing, matching, and drifted verification; and
+8. temporary-home tests proving read-only behavior and the boundary above.
 
-1. One Codex-only `entrepreneur-codex` profile selecting the two existing
-   single-skill modules.
-2. The smallest manifest, schema, or resolver adjustment required to enforce
-   Codex-only targeting.
-3. Safe Codex destination mapping under `$HOME/.agents/skills`.
-4. Canonical containment across the approved skill root and the ECC
-   installed-state file.
-5. New-install collision refusal.
-6. Unmanaged legacy-surface reporting without migration or adoption.
-7. Safe state creation.
-8. Failure rollback affecting only newly created ECC-managed files.
-9. Fail-closed doctor, repair, and uninstall.
-10. Temporary-home tests covering exact profile resolution, Codex-only
-    targeting, dry-run non-mutation, destination mapping, collisions,
-    malformed state, missing state, drift, symlinks, junctions, path escapes,
-    repair, uninstall, unrelated-file preservation, and rollback after partial
-    failure.
-11. Narrow selective-install documentation.
+Stage 3B v1 excludes:
 
-Stage 3B must exclude:
-
-- skill-body changes;
-- new skills;
+- skill-body changes or new skills;
+- profile, manifest, schema, or generic-installer registration;
+- automated copy, install, activation, repair, removal, or rollback;
+- install state, doctor, repair, or uninstall integration;
 - broad installer refactoring;
-- agents;
-- hooks;
-- MCPs;
-- connectors;
-- configuration merging;
-- generated wrappers;
-- dependencies unrelated to the bounded implementation;
-- telemetry;
-- autonomous improvement;
-- legacy migration;
-- real installation;
-- profile activation; and
-- Insurance Desk or email work.
+- agents, hooks, MCPs, connectors, or configuration merging;
+- generated wrappers or new dependencies;
+- telemetry or autonomous improvement;
+- legacy migration or cleanup;
+- real profile use as part of repository validation; and
+- Insurance Desk, private data, email, or external-system work.
+
+Any future automated lifecycle is a separate v2 architecture decision and
+requires a new issue, threat model, exact implementation boundary, and explicit
+authority. It is not the default next step.
