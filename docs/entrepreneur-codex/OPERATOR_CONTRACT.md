@@ -1,51 +1,68 @@
 # Operator Contract
 
-This contract defines the default authority boundary for the Entrepreneur Codex workspace. Repository-specific instructions and an explicitly authorized slice may narrow these permissions further.
+This contract defines the default human authority boundary for Entrepreneur
+Codex. The closest repository instructions, an unchanged live issue, and the
+operator's exact current grant may narrow it further.
 
-## Automatically allowed
+## Human authority
 
-These permissions apply only to authorized local files and repository material. They do not authorize access to work systems, customer data, or credentials.
+The human operator retains authority over scope, priorities, permissions,
+acceptance, consequential actions, and stopping work. A model, tool,
+connection, branch, issue, pull request, review, check, or permission mode does
+not independently grant authority.
 
-- Reading
-- Explaining
-- Planning
-- Local branch creation
-- Coding inside an authorized slice
-- Tests
-- Documentation
-- Draft pull-request preparation
+Ambiguous authority fails closed. Preparation does not authorize action, and
+the system must not broaden its own permissions.
 
-Automatic permission to prepare repository changes remains subject to the [Codex Project and Session Topology](PROJECT_SESSION_TOPOLOGY.md). It does not bypass that contract or grant merge authority.
+## Preparation boundary
 
-## Operator approval required
+Within an explicitly authorized repository slice, preparation may include:
 
-- Merge
-- Production deployment
-- Real customer-data use, subject to the separate approval gate in the [Insurance Knowledge Architecture](INSURANCE_KNOWLEDGE_ARCHITECTURE.md)
-- Email sending
-- Writes to [Applied EPIC](INSURANCE_KNOWLEDGE_ARCHITECTURE.md#authority), the insurance agency management system used as the official account and activity record
-- Authentication or authorization changes
-- Secrets
-- Paid spending
-- New write-capable connectors
-- Production data changes
-- Deletion of remote resources
+- reading, explaining, and planning;
+- creating the approved branch and governed worktree;
+- editing only the accepted paths;
+- running safe local checks; and
+- preparing commits, review evidence, and a draft pull request.
 
-## Review and merge gate
+These activities authorize only preparation. Access to a system or the
+technical ability to write never authorizes a consequential action there.
 
-Before review begins, capture the current live pull-request head as `H`. An
-accepted pre-merge review must satisfy
-`review.commit_id == H` and must be submitted before the merge. Every
-actionable review thread against `H` must be resolved or explicitly
-dispositioned before merge. A replacement commit, autofix, rebase, or other
-head change creates a new `H` and restarts the review gate; review of an earlier
-head is not reusable.
+## Consequential-action approval
 
-Immediately before merge, reread the live pull-request head and fail closed if
-it differs from the reviewed `H`. The closeout evidence must prove
-`review.submitted_at < PR.merged_at`. A review that arrives after merge is
-follow-up evidence only and may create correction debt; it never proves that
-review gated the merge. Passing this review gate does not itself grant merge
-authority.
+Separate operator approval, bound to the exact target and action, is required
+before:
 
-Ambiguous authority fails closed. Preparation does not grant permission to perform a consequential action, and the system must not broaden its own permissions.
+- merge, release, deployment, or production change;
+- external communication, submission, publication, or commitment;
+- use or movement of live private-domain data;
+- authentication, authorization, credential, or secret changes;
+- paid spending, billing changes, or resource purchases;
+- enabling or broadening a write-capable connection;
+- destructive or difficult-to-reverse local or remote action; or
+- any action governed by a separately owned domain contract.
+
+Approval for one action does not imply approval for another. Drafting,
+previewing, testing, reviewing, and recommending remain distinct from acting.
+
+## Exact-head review and merge gate
+
+Before review begins, capture the live pull-request head as `H`. An accepted
+independent review must bind to that exact commit. Hosted checks, the changed
+scope, and every resolved or explicitly dispositioned actionable review thread
+must also describe `H`.
+
+Any replacement commit, autofix, rebase, merge-base update, or other head
+change creates a new `H`. Earlier review evidence is invalid for the replacement
+head, which requires fresh review and applicable checks.
+
+Immediately before merge, reread the live head and fail closed if it differs
+from the reviewed `H`. Evidence must show the accepted review preceded merge.
+A review that arrives after merge is follow-up evidence only. Passing review
+does not itself grant merge authority.
+
+## Cross-domain conflicts
+
+Material conflicts about ownership, semantics, data boundaries, permission,
+or action authority fail closed. Stop, preserve evidence, and route the conflict
+to the human operator and the separately governed owner; do not choose the
+broader permission or silently copy one domain's rules into another.
